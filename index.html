@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1422">
+  <meta name="description" content="Forge Build Fight: forja piezas, construye torretas modulares y defiende tu núcleo.">
+  <title>Forge Build Fight — Prototype 0.1</title>
+  <link rel="stylesheet" href="./styles.css?v=0.1.0">
+  <script defer src="./app.js?v=0.1.0"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#forge" aria-label="Forge Build Fight">
+        <span class="brand-mark" aria-hidden="true">⚒</span>
+        <span class="brand-copy"><strong>FORGE <em>BUILD</em> FIGHT</strong><small>MODULAR TOWER DEFENSE · ALPHA 0.1</small></span>
+      </a>
+      <div class="top-right">
+        <span class="resource"><span class="resource-symbol">✦</span><b id="coins">0</b><small>ORO</small></span>
+        <span class="resource"><span class="resource-symbol gold">◈</span><b id="pulls">0</b><small>TIRADAS</small></span>
+      </div>
+    </header>
+    <nav class="main-nav" aria-label="Fases del juego">
+      <button type="button" class="nav-button active" data-nav="forge"><span class="nav-number">01</span><span>⚒ FORGE</span><small>Forja piezas</small></button>
+      <span class="nav-connector" aria-hidden="true">›</span>
+      <button type="button" class="nav-button" data-nav="build"><span class="nav-number">02</span><span>⬡ BUILD</span><small>Ensamblaje</small></button>
+      <span class="nav-connector" aria-hidden="true">›</span>
+      <button type="button" class="nav-button" data-nav="fight"><span class="nav-number">03</span><span>⚔ FIGHT</span><small>Campaña</small></button>
+      <span class="nav-spacer"></span><span class="version-pill">PROTOCOLO FBF / 001</span>
+    </nav>
+    <main>
+      <section id="forge" class="view active" aria-labelledby="forge-heading">
+        <div class="section-title"><div><div class="eyebrow">01 / EL ORIGEN DEL ARSENAL</div><h1 id="forge-heading">Domina la <span>forja.</span></h1><p>Una tirada. Una pieza. Infinitas combinaciones.</p></div><div class="section-tag">◉ SISTEMA OPERATIVO</div></div>
+        <div class="forge-layout">
+          <div class="panel forge-panel">
+            <div class="panel-head"><span class="eyebrow">ESTACIÓN DE FORJA</span><span id="forge-grade" class="status-chip">NIVEL 01</span></div>
+            <div class="forge-machine" aria-hidden="true"><div class="machine-rim"><div class="machine-core">⚒</div></div><div class="machine-sparks"><i></i><i></i><i></i><i></i></div><div class="machine-floor"></div></div>
+            <div class="forge-actions"><div><span class="overline">TIRADAS DISPONIBLES</span><div id="pulls-large" class="big-stat">0 <span>◈</span></div></div><button id="forge-btn" class="btn btn-fire" data-action="forge">FORJAR PIEZA <span>→</span></button></div>
+            <div id="forge-result" class="forge-result" aria-live="polite"><span class="muted">La próxima pieza podría cambiar tu estrategia.</span></div>
+          </div>
+          <div class="forge-side">
+            <div class="panel upgrade-panel"><div class="eyebrow">MEJORA PERMANENTE</div><h2>Potencia de forja</h2><p>Mejora ligeramente las probabilidades de rarezas superiores.</p><div class="upgrade-meter"><div id="upgrade-progress"></div></div><button id="upgrade-btn" class="btn btn-secondary" data-action="upgrade">MEJORAR FORJA</button></div>
+            <div class="panel rarity-panel"><div class="panel-head"><h2>Probabilidades</h2><span class="hint">POR TIRADA</span></div><div id="rarity-list" class="rarity-list"></div></div>
+            <div class="panel stash-panel"><div class="panel-head"><h2>Inventario</h2><span id="stash-total" class="hint"></span></div><div id="stash-summary" class="stash-summary"></div><button class="text-link" data-nav="build">IR AL TALLER <span>↗</span></button></div>
+          </div>
+        </div>
+      </section>
+      <section id="build" class="view" aria-labelledby="build-heading">
+        <div class="section-title"><div><div class="eyebrow">02 / TALLER MODULAR</div><h1 id="build-heading">Construye tu <span>arma.</span></h1><p>Cuatro componentes. Una torreta diseñada por ti.</p></div><div class="section-tag">⬡ SISTEMA DE ENSAMBLAJE</div></div>
+        <div class="build-layout">
+          <div class="panel component-panel"><div class="panel-head"><h2>Selecciona tus piezas</h2><span class="hint">4 RANURAS</span></div><div id="part-slots"></div><div class="builder-note">Las piezas se consumen al ensamblar. Puedes desmontar una torreta fuera de combate y recuperarlas.</div></div>
+          <div class="build-side">
+            <div class="panel preview-panel"><div class="eyebrow">PREVISUALIZACIÓN DE TORRETA</div><div class="turret-showcase"><div class="showcase-halo"></div><div class="turret-art"><div class="turret-core">✦</div><div class="turret-gun"><i></i></div><div class="turret-head"></div><div class="turret-base"></div></div><div class="showcase-grid"></div></div><div id="tower-stats" class="stat-grid"></div><button id="assemble-btn" class="btn btn-fire" data-action="assemble">ENSAMBLAR TORRETA <span>→</span></button></div>
+            <div class="panel"><div class="panel-head"><h2>Hangar</h2><span id="tower-count" class="hint"></span></div><div id="hangar" class="hangar-list"></div></div>
+          </div>
+        </div>
+      </section>
+      <section id="fight" class="view" aria-labelledby="fight-heading">
+        <div class="section-title"><div><div class="eyebrow">03 / DEFENSA DEL NÚCLEO</div><h1 id="fight-heading">No dejes que <span>pasen.</span></h1><p>Coloca tus torretas y resiste la oleada.</p></div><div class="section-tag">⚔ CAMPAÑA PVE</div></div>
+        <div class="fight-layout">
+          <div class="panel campaign-panel"><div class="panel-head"><h2>Campaña</h2><span class="hint">5 MISIONES</span></div><div id="mission-list" class="mission-list"></div><div class="campaign-tip">✓ Completa una misión para desbloquear la siguiente y conseguir oro y tiradas.</div></div>
+          <div class="arena-stack">
+            <div class="panel arena-panel"><div class="arena-top"><span id="level-label">NIVEL 01</span><span id="arena-status">PREPARACIÓN</span><span id="base-health">NÚCLEO 20/20</span></div><div class="canvas-wrap"><canvas id="arena" width="960" height="560" aria-label="Campo de batalla con camino y posiciones de torretas"></canvas></div><div class="arena-bottom"><span id="enemy-count">0 ENEMIGOS</span><span id="tower-placed">0 TORRETAS COLOCADAS</span><button id="start-btn" class="btn btn-fire" data-action="start">INICIAR OLEADA →</button></div></div>
+            <div id="battle-message" class="battle-message">Selecciona una torreta del hangar y toca un pedestal para colocarla.</div>
+          </div>
+          <div class="panel loadout-panel"><div class="panel-head"><h2>Tus torretas</h2><span class="hint">SELECCIONA</span></div><div id="loadout" class="loadout-list"></div><button class="text-link" data-nav="build">ABRIR TALLER <span>↗</span></button><div class="loadout-help">Pulsa un pedestal libre para colocar la torreta seleccionada. Pulsa una torreta colocada para retirarla antes del combate.</div></div>
+        </div>
+      </section>
+    </main>
+    <footer><span>FORGE BUILD FIGHT · PROTOTIPO INTERACTIVO</span><span>PROGRESO GUARDADO EN ESTE NAVEGADOR</span></footer>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
