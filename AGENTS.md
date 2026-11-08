@@ -74,7 +74,7 @@ Las fichas de Canva antiguas muestran costes y habilidades incorrectos que **no 
 | Ruta | Función |
 |---|---|
 | `index.html` | Marco de UI; arena, barra de mano, escala, modales. |
-| `styles.css` | Diseño responsivo, cartas negro/dorado/pergamino y capa de imágenes de arte. |
+| `styles.css` | Diseño responsivo de pantalla completa 100dvh, cartas negro/dorado/pergamino, animaciones de reparto y capa de imágenes de arte. |
 | `cards.js` | Reglas básicas, catálogo de 16, IDs de página Canva y rutas PNG; **datos canónicos**. |
 | `game.js` | Estado, turnos, robos, habilidades, ataques, log, render, modos CPU/local/P2P. |
 | `remote.js` | Protocolo WebRTC DataChannel y códigos SDP manuales, secuencias de acciones. |
@@ -141,3 +141,13 @@ Formato obligatorio para nuevas entradas: **fecha — tema — fuentes verificab
 - Nunca atribuir a una prueba automatizada la validación de diseño visual o conexiones reales; indicar qué se probó realmente.
 - Entregar cambios **en el repositorio**, no solo en la conversación; comprobar estado de `main` y Pages.
 - Tras cualquier investigación, **añadir lo aprendido a esta sección** con fuentes, fecha e implicación sobre el juego.
+
+## 10. 2026-11-08 — UX 0.4: partida en una sola pantalla y reparto animado
+
+- **Decisión del usuario:** el tablero, las cartas en mano, el marcador, la energía y el botón de acabar turno deben caber sin hacer scroll vertical en el navegador. Elegimos diseño **adaptativo** que sirve tanto en teléfono vertical como en horizontal y en escritorio, sin bloqueo forzoso de orientación.
+- **Mano inicial acordada:** **3 cartas exactas por jugador**, en lugar de las cinco que aparecían antes (antes había 4 cartas creadas y 1 robo extra). Se **omite el robo extra durante los dos primeros turnos globales**, pero los jugadores siguen recibiendo +3 energía al comienzo de cada turno propio. Robo normal a partir del turno global 3. El límite de mano continúa siendo 9.
+- **Animación:** cada carta nunca vista en la mano de ese jugador realiza un reparto corto; la primera mano se muestra progresivamente, y cada robo posterior tiene animación. Al usar el modo local, no se anima una mano debajo del modal de cambio de jugador: aparece solo cuando la persona nueva abre su mano. `prefers-reduced-motion` desactiva animaciones por accesibilidad.
+- **UI:** `index.html` agrega marcador HUD compacto y burbuja de información para cartas seleccionadas; `styles.css` usa altura `100dvh`, compacta carriles, oculta paneles secundarios del modo de partida, y evita scroll de la página. Mano con cartas parcialmente superpuestas según anchura; no ocultar el botón principal. `game.js` lleva seguimiento de cartas animadas por jugador, y no anima otra vez al seleccionar una carta.
+- **Cartas de efecto sin objetivo:** primero se seleccionan para leer sus detalles y requieren pulsar **JUGAR EFECTO**, evitando gastarlas accidentalmente; las criaturas se colocan tocando carril y los efectos con objetivo exigen tocar objetivo, como antes.
+- **QA mínimo obligatorio:** ejecutar tests unitarios y, si hay herramienta de navegador, comprobar que `scrollHeight <= innerHeight` y no hay scroll horizontal en tamaños de móvil vertical, móvil horizontal y escritorio; revisar que 3 cartas aparecen al principio y las animaciones no se repiten.
+- **Recordatorio:** no confundir un mockup de IA con una captura real; si no hay prueba en navegador, explicitar esa limitación.
