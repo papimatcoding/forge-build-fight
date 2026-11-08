@@ -3,18 +3,20 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 import {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL} from "../cards.js";
+import {ManualPeer,isRemoteCommand} from "../remote.js";
 
 function harness(){
  const els=new Map();
  const create=()=>({innerHTML:"",textContent:"",href:"",hidden:false,disabled:false,style:{},classList:{add(){},remove(){}},addEventListener(){}});
  const document={getElementById(id){if(!els.has(id))els.set(id,create());return els.get(id);},addEventListener(){}};
- const context={document,window:{open(){}},setTimeout:()=>1,clearTimeout(){},console,Math,
+ const context={document,window:{open(){}},setTimeout:()=>1,clearTimeout(){},console,Math,ManualPeer,isRemoteCommand,
    __cards:{CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}};
  vm.createContext(context);
  const script=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8")
-  .replace(/^import[^\n]*\n/,"const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;");
+  .replace(/^import[^\n]*\n/gm,"");
+ const globals="const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;";
  const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
- vm.runInContext(script+expose,context);
+ vm.runInContext(globals+script+expose,context);
  const api=context.testApi;api.newGame("local");return api;
 }
 
