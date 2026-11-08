@@ -141,3 +141,18 @@ Formato obligatorio para nuevas entradas: **fecha — tema — fuentes verificab
 - Nunca atribuir a una prueba automatizada la validación de diseño visual o conexiones reales; indicar qué se probó realmente.
 - Entregar cambios **en el repositorio**, no solo en la conversación; comprobar estado de `main` y Pages.
 - Tras cualquier investigación, **añadir lo aprendido a esta sección** con fuentes, fecha e implicación sobre el juego.
+
+
+## 10. Parche 0.4 — pantalla única y reparto de cartas (08/11/2026)
+
+**Requisito confirmado por el propietario:** la partida (tablero de cuatro carriles, mano, energía, balanza y botón «Acabar turno») debe ser jugable **dentro del alto de una sola pantalla**, sin scroll vertical de página. Se prefiere **móvil vertical / escritorio horizontal**, pero también hay un modo compacto para móviles horizontales; la interfaz debe responder al tamaño del viewport y no depender de mockups.
+
+- Estilos nuevos en `screen.css`, cargados **después** de `styles.css`: `height:100dvh`, estructura con CSS grid y filas `minmax(0,1fr)`, ocultación de paneles secundarios, balanza compacta visible en móvil y mano de cartas distribuida tipo abanico con posiciones porcentuales. Todas las interacciones críticas siguen visibles.
+- La **mano inicial es exactamente 3 cartas por jugador**, no 5: `RULES.startingHand=3`; el primer turno propio de cada jugador no añade una cuarta carta. **Desde su segundo turno propio** se roba una carta aleatoria; +3 energía se mantiene al inicio de cada turno. No confundir mano inicial de 3 con mano de 3 más robo de apertura.
+- Al mostrarse por primera vez una carta en mano, `game.js` añade la clase `is-dealt` para una animación `card-deal` con retardo escalonado, incluida la mano inicial. Las UID ya vistas se registran por jugador y partida para impedir reanimaciones al seleccionar un objetivo o volver a pintar la UI.
+- **1v1 local:** la pantalla «Pasa el dispositivo» debe aparecer antes de mostrar/animar la mano del siguiente jugador; animar cuando este confirme que está listo. **P2P:** nunca dejar escapar cartas ocultas del adversario para hacer animaciones.
+- Accesibilidad: respetar `prefers-reduced-motion` y conservar `aria-label` con el efecto completo. Si la mano alcanza 9 cartas puede mostrarse solapada; sigue siendo obligatorio que cada carta tenga una región táctil y se pueda seleccionar.
+- Los modales de reglas, colección y conexión P2P pueden desplazarse **dentro del modal**, pero el campo principal no debe requerir scroll de página. Verificar en varios tamaños de pantalla y con zoom/ajustes de texto cuando sea viable.
+- Validación requerida: `npm run check`, `npm test`, `CI` y, de ser posible, pruebas de navegador con viewports representativos (320×568, 390×844, 844×390, 1366×768). **Los tests de Node no demuestran por sí solos que una interfaz quepa visualmente**.
+- Registrar en cada parche si el nuevo CSS se ha incluido correctamente en `.github/workflows/pages.yml`; si no se publica `screen.css`, el resultado no se verá en Pages.
+- No restaurar un HUD antiguo con columnas extra que fuerce scroll. Futuros gráficos y animaciones deben respetar presupuesto de viewport.
