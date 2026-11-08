@@ -13,17 +13,34 @@ const lc=(text)=>{logs.unshift(text);logs=logs.slice(0,9);};
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),2400);}
 function newGame(mode){
  session++;selected=null;thinking=false;logs=[];modalOpen=false;
- game={mode,current:0,turns:0,score:0,finished:false,players:[0,1].map(()=>({energy:0,hand:Array.from({length:RULES.startingHand},draw),board:Array(RULES.lanes).fill(null)}))};
+ game={mode,current:0,turns:0,score:0,finished:false,players:[0,1].map(()=>({energy:0,hand:Array.from({length:RULES.startingHand},draw),board:Array(RULES.lanes).fill(null),freeTurn:false,focusTargetId:null}))};
  lc('Empieza el duelo. La dignidad queda fuera del tablero.');
  enterTurn();closeModal();render();
 }
 function enterTurn(){
- const p=own();p.energy=clamp(p.energy+RULES.energyPerTurn,0,RULES.maxEnergy);
- for(const u of p.board)if(u?.id==='raul')p.energy=clamp(p.energy+1,0,RULES.maxEnergy);
+ const p=own();
+ p.freeTurn=false;
+ p.energy=clamp(p.energy+RULES.energyPerTurn,0,RULES.maxEnergy);
+ for(let i=0;i<RULES.lanes;i++){
+  const u=p.board[i];
+  if(!u)continue;
+  if(u.id==='raul')p.energy=clamp(p.energy+1,0,RULES.maxEnergy);
+  if(u.id==='perry'){
+   const lost=u.maxHealth-u.health;
+   u.hat=!u.hat;
+   u.attack=u.hat?2:4;
+   u.maxHealth=u.hat?3:2;
+   u.health=u.maxHealth-lost;
+   u.shield=u.hat?1:0;
+   lc('Perry se '+(u.hat?'pone el gorro de agente (2/3 y protección).':'quita el gorro (4/2 y sin protección).'));
+   if(u.health<=0)damage(game.current,i,999,'crisis de identidad');
+  }
+ }
  for(let i=0;i<RULES.drawPerTurn;i++)if(p.hand.length<RULES.maxHand)p.hand.push(draw());
  lc(playerName(game.current)+' recibe energía y roba una carta.');
 }
 function modifiedCost(info,player){
+ if(game.players[player].freeTurn)return 0;
  return info.cost+(info.cost>=4&&game.players[1-player].board.some(u=>u?.id==='inspector')?1:0);
 }
 function eligible(info,player){
@@ -31,15 +48,15 @@ function eligible(info,player){
  if(info.type==='unit')return p.board.some(u=>u===null);
  if(info.effect==='cancer')return foe.board.some(u=>u&&!u.cancer);
  if(info.effect==='chemo')return p.board.some(u=>u&&u.cancer);
- if(info.effect==='hyper')return p.board.some(u=>u&&foe.board.some(v=>v&&v.attack>u.attack));
- if(info.effect==='pirate')return foe.hand.length>0&&p.hand.length<RULES.maxHand;
+ if(info.effect==='hyper')return p.board.some(u=>u&&u.attack>0)&&foe.board.some(v=>v);
+ if(info.effect==='pirate')return !p.freeTurn;
  return true;
 }
 function unitOf(info){
- return {uid:uid(),id:info.id,attack:info.attack,health:info.health,maxHealth:info.health,cancer:0,stun:0,shield:info.effect==='agent'?1:0,slipper:true};
+ return {uid:uid(),id:info.id,attack:info.attack,health:info.health,maxHealth:info.health,cancer:0,stun:0,shield:info.effect==='agent'?1:0,slipper:true,hat:info.id==='perry',cheese:0};
 }
 function isShielded(player,info){
- if(!['cancer','taxoffice','pirate','sixseven'].includes(info.effect))return false;
+ if(!['cancer','taxoffice','sixseven'].includes(info.effect))return false;
  const agent=game.players[1-player].board.find(u=>u?.id==='perry'&&u.shield>0);
  if(!agent)return false;
  agent.shield=0;lc('¡Perry ha interceptado el efecto «'+info.name+'»!');return true;
@@ -58,7 +75,7 @@ function damage(boardOwner,lane,amount,reason){
  lc('¡'+card(target.id).name+' ha caído!'+(reason?' ('+reason+')':''));
  if(target.id==='pereira'){
    const rival=game.players[1-boardOwner].board[lane];
-   if(rival){lc('Pereira Castor se venga desde el más allá.');damage(1-boardOwner,lane,2,'venganza del castor');}
+   if(rival){lc('¡Pereira Castor contraataca con sus PALETAS!');damage(1-boardOwner,lane,2,'paletazo post mortem');}
  }
 }
 function applyEffect(info,player,lane){
@@ -76,7 +93,9 @@ function applyEffect(info,player,lane){
   lc('Agencia Tributaria confisca '+seized+' ⚡ y devuelve una migaja.');break;
  }
  case 'pirate':{
-  if(foe.hand.length){const index=Math.floor(Math.random()*foe.hand.length);const [stolen]=foe.hand.splice(index,1);p.hand.push(stolen);lc('¡Token pirata robó una carta de la mano rival!');}break;
+  p.freeTurn=true;
+  lc('¡TOKEN PIRATA! Todas las cartas que juegues durante este turno cuestan 0 ⚡.');
+  break;
  }
  case 'sixseven':{
   const valid=foe.board.map((x,i)=>x?i:-1).filter(i=>i>=0);
@@ -85,7 +104,12 @@ function applyEffect(info,player,lane){
   break;
  }
  case 'hyper':{
-  const t=p.board[lane];if(t){t.attack+=2;t.health+=2;t.maxHealth+=2;lc(card(t.id).name+' ha ascendido socialmente (+2/+2).');}break;
+  const t=foe.board[lane];
+  if(t){
+   p.focusTargetId=t.uid;
+   lc('¡HIPERGAMIA! Todas tus criaturas apuntarán a '+card(t.id).name+' en su próximo ataque.');
+  }
+  break;
  }
  }
 }
@@ -103,7 +127,7 @@ function playCard(player,handUid,lane=null){
   if(target==='friend'&&info.type==='spell'&&!p.board[lane])return false;
   if(target==='friendCancer'&&(!p.board[lane]||!p.board[lane].cancer))return false;
   if(target==='enemy'&&(!game.players[1-player].board[lane]||game.players[1-player].board[lane].cancer))return false;
-  if(info.effect==='hyper'&&!game.players[1-player].board.some(e=>e&&e.attack>p.board[lane].attack))return false;
+  if(info.effect==='hyper'&&!p.board.some(u=>u&&u.attack>0))return false;
  }
  p.energy-=cost;p.hand.splice(idx,1);selected=null;
  lc(playerName(player)+' juega «'+info.name+'» ('+cost+' ⚡).');
@@ -117,9 +141,39 @@ function playCard(player,handUid,lane=null){
  }else applyEffect(info,player,lane);
  render();return true;
 }
+function giveCheese(p,lane){
+ let served=0;
+ for(const neighbor of [lane-1,lane+1]){
+  if(neighbor<0||neighbor>=RULES.lanes||!p.board[neighbor])continue;
+  const ally=p.board[neighbor];
+  ally.health=Math.min(ally.maxHealth,ally.health+1);
+  ally.cheese=Math.min(9,(ally.cheese||0)+1);
+  served++;
+ }
+ if(served)lc('🧀 La vaca que ríe reparte '+served+' queso(s) curativos a sus vecinos.');
+}
 function attackStep(player){
- lc('⚔ Atacan las cartas de '+playerName(player)+'.');
- const p=game.players[player];
+ lc('⚔ Atacan ÚNICAMENTE las cartas de '+playerName(player)+'.');
+ const p=game.players[player],foe=game.players[1-player];
+ const focus=p.focusTargetId,focusedLane=focus?foe.board.findIndex(u=>u?.uid===focus):-1;
+ p.focusTargetId=null;
+ if(focus&&focusedLane>=0){
+  const target=foe.board[focusedLane];
+  let volley=0,attackers=0;
+  for(let lane=0;lane<RULES.lanes;lane++){
+   const u=p.board[lane];
+   if(!u||u.attack<=0)continue;
+   if(u.stun>0){u.stun--;lc(card(u.id).name+' está aturdido y no dispara.');continue;}
+   volley+=u.id==='duck'?3:u.attack;
+   if(u.id==='grandma'&&u.slipper){volley+=2;u.slipper=false;}
+   if(u.id==='cow')giveCheese(p,lane);
+   attackers++;
+  }
+  lc('🎯 HIPERGAMIA: '+attackers+' criaturas concentran '+volley+' de daño en '+card(target.id).name+'.');
+  if(volley>0)damage(1-player,focusedLane,volley,'ataque concentrado');
+  return;
+ }
+ if(focus)lc('El objetivo de Hipergamia desapareció antes del ataque; se ataca normalmente.');
  for(let lane=0;lane<RULES.lanes;lane++){
   if(game.finished)break;
   const u=p.board[lane];if(!u)continue;
@@ -128,15 +182,16 @@ function attackStep(player){
   const hits=u.id==='duck'?[1,1,1]:[u.attack];
   for(let hit of hits){
    if(game.finished||!p.board[lane]||p.board[lane].uid!==u.uid)break;
-   const t=game.players[1-player].board[lane];
+   const t=foe.board[lane];
    if(t){
-    let d=hit;if(u.id==='grandma'&&u.slipper){d+=2;u.slipper=false;lc('¡CHANCLAZO SUPREMO!');}
+    let d=hit;
+    if(u.id==='grandma'&&u.slipper){d+=2;u.slipper=false;lc('¡CHANCLAZO SUPREMO!');}
     damage(1-player,lane,d,card(u.id).name);
    }else scoreDirect(player,hit,card(u.id).name);
   }
   if(game.finished||!p.board[lane]||p.board[lane].uid!==u.uid)continue;
-  if(u.id==='trancas')for(const neighbor of [lane-1,lane+1])if(neighbor>=0&&neighbor<RULES.lanes&&game.players[1-player].board[neighbor])damage(1-player,neighbor,1,'ataque en pareja');
-  if(u.id==='cow')for(const neighbor of [lane-1,lane+1])if(neighbor>=0&&neighbor<RULES.lanes&&p.board[neighbor]){const x=p.board[neighbor];x.health=Math.min(x.maxHealth,x.health+1);}
+  if(u.id==='trancas')for(const neighbor of [lane-1,lane+1])if(neighbor>=0&&neighbor<RULES.lanes&&foe.board[neighbor])damage(1-player,neighbor,1,'ataque en pareja');
+  if(u.id==='cow')giveCheese(p,lane);
  }
 }
 function applyDiseases(player){
@@ -231,15 +286,16 @@ function queueCPU(){
 }
 function canvaUrl(c){
  if(!CANVA_SERIES_I_URL)return '';
- return CANVA_SERIES_I_URL+'?page='+c.canvaPage;
+ return CANVA_SERIES_I_URL; // Las 16 páginas están enlazadas por card.canvaPage; Canva no ofrece URL de imagen permanente.
 }
 function cardHtml(c,unit=null,variant='hand'){
  const stats=c.type==='unit'?'<div class="card-stats"><span>⚔ '+(unit?unit.attack:c.attack)+'</span><span>♥ '+(unit?unit.health:c.health)+'</span></div>':'<div class="spell-stats">EFECTO</div>';
  const active=variant==='hand'&&game&&modifiedCost(c,game.current)<=own().energy&&eligible(c,game.current);
- const badges=unit?(unit.cancer?'<span class="status cancer">🦠 '+unit.cancer+'</span>':'')+(unit.stun?'<span class="status">💫</span>':'')+(unit.shield?'<span class="status">🕵️</span>':''):'';
+ const badges=unit?(unit.cancer?'<span class="status cancer">🦠 '+unit.cancer+'</span>':'')+(unit.stun?'<span class="status">💫</span>':'')+(unit.shield?'<span class="status">🕵️</span>':'')+(unit.cheese?'<span class="status">🧀'+unit.cheese+'</span>':''):'';
+ const artIcon=unit&&c.id==='perry'?(unit.hat?'🕵️':'🦦'):c.icon;
  return '<div class="card-piece '+c.type+' '+variant+(variant==='hand'&&!active?' inactive':'')+'" style="--art-hue:'+c.hue+'">'
    +'<div class="card-top"><span class="cost-bubble">⚡'+(variant==='hand'&&game?modifiedCost(c,game.current):c.cost)+'</span><span class="set-tag">SERIE I</span></div>'
-   +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+c.icon+'</span><span class="art-rays">✷</span></div>'
+   +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+artIcon+'</span><span class="art-rays">✷</span></div>'
    +'<div class="card-name">'+c.name+'</div><div class="card-kind">'+c.kind+'</div>'
    +(variant==='board'?'':('<p class="card-description">'+c.text+'</p>'))
    +'<div class="card-bottom">'+stats+badges+'</div></div>';
@@ -249,7 +305,7 @@ function renderSlots(target,player,isOwn){
   const c=u?card(u.id):null;
   const targetType=selected?card(selected.id).type==='unit'?'friend':card(selected.id).target||'none':'none';
   const available=selected&&(targetType===(isOwn?'friend':'enemy')||(targetType==='friendCancer'&&isOwn))&&
-     (c?targetType==='enemy'&&!u.cancer||targetType==='friendCancer'&&u.cancer||targetType==='friend'&&card(selected.id).type==='spell'&&u:targetType==='friend'&&card(selected.id).type==='unit');
+     (c?targetType==='enemy'&&(card(selected.id).effect!=='cancer'||!u.cancer)||targetType==='friendCancer'&&u.cancer||targetType==='friend'&&card(selected.id).type==='spell':targetType==='friend'&&card(selected.id).type==='unit');
   return '<button class="lane '+(c?'filled':'empty')+' '+(available?'targetable':'')+'" data-side="'+(isOwn?'own':'enemy')+'" data-lane="'+i+'" aria-label="'+(c?c.name:'Carril '+(i+1)+' libre')+'">'
    +(c?cardHtml(c,u,'board'):'<div class="empty-mark"><b>＋</b><small>'+String(i+1).padStart(2,'0')+'</small></div>')
    +'</button>';
@@ -278,7 +334,7 @@ function render(){
  $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking;
  $('instruction').textContent=selected?'Objetivo de '+card(selected.id).name+': '+(card(selected.id).type==='unit'?'coloca en un carril libre':card(selected.id).target==='enemy'?'selecciona un enemigo':'selecciona una criatura aliada'):'Selecciona una carta para jugarla.';
  $('hint').textContent=game.turns<2?'No se ataca durante los dos primeros turnos.':'Tus criaturas atacarán al acabar tu turno.';
- const focus=selected?card(selected.id):random(CARDS); // Preview matches selected card, or random.
+ const focus=selected?card(selected.id):CARDS[0]; // Evita que la vista previa salte de carta cada vez que renderizamos.
  $('featured-name').textContent=focus.name;
  $('featured').innerHTML=cardHtml(focus,null,'feature-card');
  $('featured-desc').textContent=focus.text;
