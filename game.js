@@ -106,16 +106,17 @@ function eligible(info,player){
  if(info.effect==='chemo')return p.board.some(u=>u&&u.cancer);
  if(info.effect==='hyper')return p.board.some(u=>u&&u.attack>0)&&foe.board.some(v=>v);
  if(info.effect==='pirate')return !p.freeTurn;
+ if(info.effect==='hex'||info.effect==='delay')return foe.board.some(u=>u);
  return true;
 }
 function unitOf(info){
- return {uid:uid(),id:info.id,attack:info.attack,health:info.health,maxHealth:info.health,cancer:0,stun:0,shield:info.effect==='agent'?1:0,slipper:true,hat:info.id==='perry',cheese:0};
+ return {uid:uid(),id:info.id,attack:info.attack,health:info.health,maxHealth:info.health,cancer:0,stun:0,shield:info.effect==='agent'?1:0,slipper:true,hat:info.id==='perry',cheese:0,hex:0};
 }
 function isShielded(player,info){
- if(!['cancer','taxoffice','sixseven'].includes(info.effect))return false;
+ if(!['cancer','taxoffice','sixseven','hex','delay','bank'].includes(info.effect))return false;
  const agent=game.players[1-player].board.find(u=>u?.id==='perry'&&u.shield>0);
  if(!agent)return false;
- agent.shield=0;lc('¡Perry ha interceptado el efecto «'+info.name+'»!');return true;
+ agent.shield=0;announceAbility('🕵️ ESCUDO DE PERRY','Bloquea '+info.name,'shield');return true;
 }
 function scoreDirect(player,value,source){
  game.score+=(player===0?1:-1)*value;
@@ -130,6 +131,7 @@ function damage(boardOwner,lane,amount,reason){
  game.players[boardOwner].board[lane]=null;
  lc('¡'+card(target.id).name+' ha caído!'+(reason?' ('+reason+')':''));
  if(target.id==='pereira'){
+   announceAbility('🦫 PALETAZO','Pereira contraataca por 2 de daño','attack');
    const rival=game.players[1-boardOwner].board[lane];
    if(rival){lc('¡Pereira Castor contraataca con sus PALETAS!');damage(1-boardOwner,lane,2,'paletazo post mortem');}
  }
@@ -139,32 +141,58 @@ function applyEffect(info,player,lane){
  if(isShielded(player,info))return;
  switch(info.effect){
  case 'cancer': {
-  const t=foe.board[lane];if(t){t.cancer=3;lc('Cáncer infecta a '+card(t.id).name+': 3 turnos para Quimio.');}break;
+  const t=foe.board[lane];if(t){t.cancer=3;announceAbility('🦠 CÁNCER','Tres finales de turno para Quimio','debuff');}break;
  }
  case 'chemo': {
-  const t=p.board[lane];if(t){t.cancer=0;lc('Quimio elimina Cáncer, pero debilita al paciente.');damage(player,lane,1,'Quimio');}break;
+  const t=p.board[lane];if(t){t.cancer=0;announceAbility('💉 QUIMIO','Elimina Cáncer pero causa 1 de daño','heal');damage(player,lane,1,'Quimio');}break;
  }
  case 'taxoffice':{
   const seized=Math.min(2,foe.energy);foe.energy-=seized;p.energy=clamp(p.energy+1,0,RULES.maxEnergy);
-  lc('Agencia Tributaria confisca '+seized+' ⚡ y devuelve una migaja.');break;
+  announceAbility('🏦 HACIENDA','Confisca '+seized+' ⚡ y devuelve 1 ⚡','energy');break;
  }
  case 'pirate':{
   p.freeTurn=true;
-  lc('¡TOKEN PIRATA! Todas las cartas que juegues durante este turno cuestan 0 ⚡.');
+  announceAbility('🪙 TOKEN PIRATA','Tus cartas cuestan 0 este turno','energy');
   break;
  }
  case 'sixseven':{
   const valid=foe.board.map((x,i)=>x?i:-1).filter(i=>i>=0);
-  if(Math.random()<.5&&valid.length){const l=random(valid);lc('SIX: ¡6 de daño a una criatura aleatoria!');damage(1-player,l,6,'SIX');}
-  else{p.energy=clamp(p.energy+7,0,RULES.maxEnergy);lc('SEVEN: ¡+7 de energía! SIX SEVEEEEN.');}
+  if(Math.random()<.5&&valid.length){const l=random(valid);announceAbility('6️⃣ SIX','6 de daño aleatorio','attack');damage(1-player,l,6,'SIX');}
+  else{p.energy=clamp(p.energy+7,0,RULES.maxEnergy);announceAbility('7️⃣ SEVEN','+7 energía','energy');}
   break;
  }
  case 'hyper':{
   const t=foe.board[lane];
   if(t){
    p.focusTargetId=t.uid;
-   lc('¡HIPERGAMIA! Todas tus criaturas apuntarán a '+card(t.id).name+' en su próximo ataque.');
+   announceAbility('💍 HIPERGAMIA','Ataque concentrado en '+card(t.id).name,'attack');
   }
+  break;
+ }
+
+ case 'hex':{
+  const t=foe.board[lane];
+  if(t){t.hex=2;announceAbility('🔮 MALA SUERTE',card(t.id).name+' pierde 2 ATQ durante 2 ataques','debuff');}
+  break;
+ }
+ case 'delay':{
+  const t=foe.board[lane];
+  if(t){t.stun++;announceAbility('🚆 RENFE','Pierde el próximo ataque','debuff');}
+  break;
+ }
+ case 'contraband':{
+  const n=bonusDraw(player,'unit',2);
+  announceAbility('📦 CARGAMENTO','Roba '+n+' cartas de combate','draw');
+  break;
+ }
+ case 'ai':{
+  const a=bonusDraw(player,'unit'),b=bonusDraw(player,'spell');
+  announceAbility('🤖 CHATGPT','Roba '+a+' criatura y '+b+' efecto','draw');
+  break;
+ }
+ case 'bank':{
+  const n=Math.min(3,foe.energy,RULES.maxEnergy-p.energy);
+  p.energy+=n;announceAbility('🎤 BRONCANO','Copia '+n+' ⚡ del rival','energy');
   break;
  }
  }
@@ -189,10 +217,21 @@ function playCard(player,handUid,lane=null){
  lc(playerName(player)+' juega «'+info.name+'» ('+cost+' ⚡).');
  if(info.type==='unit'){
   const u=unitOf(info);p.board[lane]=u;
-  if(info.effect==='stun'){const t=game.players[1-player].board[lane];if(t){t.stun=1;lc('¡'+card(t.id).name+' queda aturdido!');}}
+  if(info.effect==='stun'){const t=game.players[1-player].board[lane];if(t){t.stun++;announceAbility('🪵 SAHUR','Aturde a '+card(t.id).name,'debuff');}}
   if(info.effect==='block'){
     const alternatives=[lane-1,lane+1,0,1,2,3].filter(i=>i>=0&&i<RULES.lanes&&p.board[i]===null);
-    if(alternatives.length)p.board[alternatives[0]]=unitOf(BLOCK);
+    if(alternatives.length){p.board[alternatives[0]]=unitOf(BLOCK);announceAbility('⛏️ STEVE','Coloca un bloque de tierra','summon');}
+  }
+  if(info.effect==='cheer'){
+   let n=0;
+   for(const x of [lane-1,lane+1])if(x>=0&&x<RULES.lanes&&p.board[x]){
+    const t=p.board[x];t.health=Math.min(t.maxHealth,t.health+1);n++;
+   }
+   announceAbility('🤝 CONSEJOS DE ALONSO','Cura a '+n+' aliados vecinos','heal');
+  }
+  if(info.effect==='hustle'){
+   p.energy=clamp(p.energy+1,0,RULES.maxEnergy);
+   announceAbility('✊ PUÑOS ARRIBA','+1 energía','energy');
   }
  }else applyEffect(info,player,lane);
  render();if(game.mode==='p2p-host')sendGuestSnapshot();return true;
@@ -206,7 +245,7 @@ function giveCheese(p,lane){
   ally.cheese=Math.min(9,(ally.cheese||0)+1);
   served++;
  }
- if(served)lc('🧀 La vaca que ríe reparte '+served+' queso(s) curativos a sus vecinos.');
+ if(served)announceAbility('🧀 QUESOS','La vaca cura a '+served+' vecinos','heal');
 }
 function attackStep(player){
  lc('⚔ Atacan ÚNICAMENTE las cartas de '+playerName(player)+'.');
