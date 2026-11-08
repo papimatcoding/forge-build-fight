@@ -1,0 +1,35 @@
+name: Visual smoke test — one-screen gameplay
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install browser test harness
+        run: npm install --no-save playwright@1.56.1
+      - name: Install Chromium dependencies
+        run: npx playwright install chromium --with-deps
+      - name: Start local site
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/barbaridades-http.log 2>&1 &
+          sleep 2
+      - name: Test gameplay in five viewport sizes
+        run: node tests/layout.browser.mjs
+      - name: Upload screenshots if a viewport fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: barbaridades-ui-failures
+          path: /tmp/barbaridades-*.png
+          if-no-files-found: ignore

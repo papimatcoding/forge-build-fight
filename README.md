@@ -1,4 +1,4 @@
-# BARBARIDADES — Serie I · 0.3
+# BARBARIDADES — Serie I · 0.4
 
 Juego web de estrategia por turnos con 16 cartas absurdas, cuatro carriles y victoria por balanza. Sustituye definitivamente el viejo prototipo **Forge Build Fight**.
 
@@ -10,7 +10,7 @@ Juego web de estrategia por turnos con 16 cartas absurdas, cuatro carriles y vic
 ## Reglas
 
 - Los jugadores comparten una arena con **4 carriles enfrentados**.
-- Al comienzo de cada turno propio: **+3 energía** y **+1 carta aleatoria** (también salen repetidas). La energía se acumula hasta 10. La mano inicial son 4 cartas, más el robo del primer turno.
+- Al comienzo de cada turno propio: **+3 energía** y **+1 carta aleatoria** (también salen repetidas). La energía se acumula hasta 10. La mano inicial son 3 cartas, sin robo extra en el primer turno.
 - Juegas cuantas cartas y efectos quieras pagando la energía.
 - Los **dos primeros turnos globales** no tienen fase de ataque.
 - Desde el tercer turno, al pulsar *Acabar turno*, **solo atacan las criaturas del jugador activo**, de carril a carril. Si no hay carta rival enfrente, anota directamente en la balanza.
@@ -65,3 +65,11 @@ El contenido original se aloja en GitHub Pages con un workflow de Actions (`.git
 - Exportación desde Canva del arte nativo a resolución alta y revisión visual individual.
 - Reconexión, servidor TURN opcional y salas con código corto.
 - Desacoplar el motor de la UI, semilla auditada/compromiso de RNG para evitar la confianza ciega en el anfitrión.
+
+## Interfaz y reparto (v0.4)
+
+La partida emplea una disposición **de pantalla única**. El tablero de 4 carriles, las dos áreas de jugadores, la balanza, las cartas de la mano y los controles del turno encajan en `100dvh`, con diseños compactos en móvil vertical y horizontal, sin scroll de **página**. Las cartas de la mano se distribuyen en abanico cuando hay muchas y se pueden tocar para ver/seleccionar.
+
+Cada jugador empieza con exactamente **3 cartas**; los robos de turnos posteriores y las cartas iniciales entran con una **animación escalonada**. Respetamos la opción de accesibilidad `prefers-reduced-motion`.
+
+`screen.css` se carga después de `styles.css` y está incluido en el empaquetado de GitHub Pages. Los modales (reglas/colección/P2P) pueden desplazarse por separado si su contenido no cabe; la partida no debe necesitar desplazamiento vertical.

@@ -15,7 +15,7 @@ function harness(){
  const script=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8")
   .replace(/^import[^\n]*\n/gm,"");
  const globals="const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;";
- const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
+ const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,render,shownHand:()=>document.getElementById("hand").innerHTML,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
  vm.runInContext(globals+script+expose,context);
  const api=context.testApi;api.newGame("local");return api;
 }
@@ -104,4 +104,28 @@ test("P2P host transmits only the guest hand, never its own hidden cards",()=>{
  assert.ok(view.players[1].hand.every(h=>typeof h.id==="string"&&typeof h.uid==="string"));
  assert.equal(view.players[0].board.length,4);
  assert.equal(view.players[1].board.length,4);
+});
+
+
+test("Opening hands are exactly three cards for both players, without bonus draw",()=>{
+ const t=harness(),g=t.getGame();
+ assert.equal(RULES.startingHand,3);
+ assert.equal(g.players[0].hand.length,3);
+ assert.equal(g.players[1].hand.length,3);
+ t.endTurn();t.closeModal();
+ assert.equal(g.players[1].hand.length,3);
+ t.endTurn();t.closeModal();
+ assert.equal(g.players[0].hand.length,4); // First draw on second J1 turn.
+});
+test("Initial deal and subsequent draw animate once, without reanimating every render",()=>{
+ const t=harness(),g=t.getGame();
+ const first=t.shownHand();
+ assert.equal((first.match(/is-dealt/g)||[]).length,3);
+ t.render();
+ assert.equal((t.shownHand().match(/is-dealt/g)||[]).length,0);
+ t.endTurn();t.closeModal();t.render();
+ assert.equal((t.shownHand().match(/is-dealt/g)||[]).length,3);
+ t.endTurn();t.closeModal();t.render();
+ assert.equal(g.players[0].hand.length,4);
+ assert.equal((t.shownHand().match(/is-dealt/g)||[]).length,1);
 });

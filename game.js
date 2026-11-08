@@ -4,6 +4,8 @@ const $=id=>document.getElementById(id);
 const random=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let session=0,game=null,selected=null,logs=[],modalOpen=true,thinking=false;
+// UIDs already revealed on-screen. Newly visible cards animate exactly once.
+let revealedCards=[new Set(),new Set()];
 let peer=null,remotePending=false,lastSnapshot=0,version=0;
 const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const draw=()=>({uid:uid(),id:random(CARDS).id});
@@ -16,6 +18,7 @@ function toast(message){const el=$('toast');el.textContent=message;el.classList.
 function newGame(mode){
  if(peer&&mode!=='p2p-host'){peer.close();peer=null;}
  session++;selected=null;thinking=false;logs=[];modalOpen=false;remotePending=false;lastSnapshot=0;version=0;
+ revealedCards=[new Set(),new Set()];
  game={mode,current:0,turns:0,score:0,finished:false,players:[0,1].map(()=>({energy:0,hand:Array.from({length:RULES.startingHand},draw),board:Array(RULES.lanes).fill(null),freeTurn:false,focusTargetId:null}))};
  lc('Empieza el duelo. La dignidad queda fuera del tablero.');
  enterTurn();closeModal();render();
@@ -39,8 +42,12 @@ function enterTurn(){
    if(u.health<=0)damage(game.current,i,999,'crisis de identidad');
   }
  }
- for(let i=0;i<RULES.drawPerTurn;i++)if(p.hand.length<RULES.maxHand)p.hand.push(draw());
- lc(playerName(game.current)+' recibe energía y roba una carta.');
+ // Each player starts with exactly 3 cards; the first turn does not grant a fourth.
+ // Beginning with their second own turn, draw one independent random card.
+ const draws=game.turns<RULES.openingTurnsWithoutAttack?0:RULES.drawPerTurn;
+ let drawn=0;
+ for(let i=0;i<draws;i++)if(p.hand.length<RULES.maxHand){p.hand.push(draw());drawn++;}
+ lc(playerName(game.current)+' recibe energía'+(drawn?' y roba '+drawn+' carta'+(drawn===1?'':'s'):' (mano inicial: 3 cartas)')+'.');
 }
 function modifiedCost(info,player){
  if(game.players[player].freeTurn)return 0;
@@ -220,8 +227,11 @@ function endTurn(fromRemote=false){
  applyDiseases(player);
  if(game.finished){render();return;}
  game.turns++;game.current=1-player;selected=null;
- enterTurn();render();
+ enterTurn();
+ // Hide the next player's cards until the pass-device screen is dismissed.
+ // This also prevents the initial draw animation from running behind the modal.
  if(game.mode==='local')showHandoff();
+ render();
  if(game.mode==='cpu'&&game.current===1)queueCPU();
 }
 function win(player){
@@ -345,7 +355,7 @@ function showHandoff(){
 function showRules(){
  showModal('REGLAS <em>DEL ABSURDO</em>','MANUAL NO HOMOLOGADO','Juega criaturas en tus cuatro carriles y efectos para molestar, mejorar o robar. Puedes usar tantas cartas como te deje la energía.',[
  {label:'ENTENDIDO',action:'close',primary:true}
- ],'<p class="secondary">Recibes +3 energía y 1 carta aleatoria al comenzar cada turno propio (máximo 10 de energía). La energía se guarda. Los dos primeros turnos globales no hay ataques. Después, al pulsar ACABAR TURNO, atacan solo tus criaturas: dañan a la criatura enfrente o anotan puntos si su carril está libre. La balanza termina con 5 de ventaja. Cáncer cuenta 3 finales de turno de la víctima, por lo que hay oportunidades de usar Quimio.</p>');
+ ],'<p class="secondary">Empiezas con 3 cartas. Desde tu segundo turno propio robas 1 carta aleatoria. Recibes +3 energía al comenzar cada turno propio (máximo 10). La energía se guarda. Los dos primeros turnos globales no hay ataques. Después, al pulsar ACABAR TURNO, atacan solo tus criaturas: dañan a la criatura enfrente o anotan puntos si su carril está libre. La balanza termina con 5 de ventaja. Cáncer cuenta 3 finales de turno de la víctima, por lo que hay oportunidades de usar Quimio.</p>');
 }
 function showCollection(){
  const gallery=CARDS.map(c=>'<div class="collection-unit">'+cardHtml(c,null,'collection')+'</div>').join('');
@@ -435,11 +445,30 @@ function render(){
  renderSlots('enemy-lanes',1-view,false);renderSlots('own-lanes',view,true);
  const cpuThinking=game.mode==='cpu'&&game.current===1;
  const waiting=(game.mode==='p2p-host'||game.mode==='p2p-guest')&&!myTurn;
- $('hand').innerHTML=cpuThinking?'<div class="no-cards">La CPU está pensando una atrocidad...</div>':me.hand.map(h=>'<button class="hand-card '+(selected?.uid===h.uid?'selected':'')+'" data-hand="'+h.uid+'">'+cardHtml(card(h.id),null,'hand')+'</button>').join('');
+ const handCount=me.hand.length;
+ const mayReveal=!modalOpen&&!cpuThinking&&!game.finished;
+ const justDealt=new Set();
+ if(mayReveal){
+  for(const h of me.hand)if(h.uid&&!revealedCards[view].has(h.uid)){
+   revealedCards[view].add(h.uid);
+   justDealt.add(h.uid);
+  }
+ }
+ $('hand').innerHTML=cpuThinking?'<div class="no-cards">La CPU está pensando una atrocidad...</div>':
+ me.hand.map((h,i)=>{
+  const info=card(h.id);
+  const isNew=justDealt.has(h.uid);
+  const progress=handCount>1?i/(handCount-1):.5;
+  const offset=(progress*100).toFixed(2);
+  const styles='--pos:'+offset+'%;--shift:-'+offset+'%;--stack:'+(i+1)+';--deal-delay:'+(isNew?Math.min(i*115,800):0)+'ms';
+  return '<button class="hand-card '+(selected?.uid===h.uid?'selected ':'')+(isNew?'is-dealt':'')+
+   '" style="'+styles+'" data-hand="'+h.uid+'" title="'+escapeHtml(info.name+': '+info.text)+
+   '" aria-label="'+escapeHtml(info.name+'; '+info.text)+'">'+cardHtml(info,null,'hand')+'</button>';
+ }).join('');
  if(!me.hand.length&&!cpuThinking)$('hand').innerHTML='<div class="no-cards">No tienes cartas en la mano. Robarás al empezar tu siguiente turno.</div>';
  $('cancel').hidden=!selected;
  $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking||waiting||remotePending;
- $('instruction').textContent=selected?'Objetivo de '+card(selected.id).name+': '+(card(selected.id).type==='unit'?'coloca en un carril libre':card(selected.id).target==='enemy'?'selecciona un enemigo':'selecciona una criatura aliada'):'Selecciona una carta para jugarla.';
+ $('instruction').textContent=selected?card(selected.id).name+': '+card(selected.id).text:'Toca una carta para ver su efecto y jugarla.';
  $('hint').textContent=waiting?'ES EL TURNO DE TU RIVAL · ESPERA':remotePending?'ESPERANDO CONFIRMACIÓN DEL ANFITRIÓN':game.turns<2?'No se ataca durante los dos primeros turnos.':'Tus criaturas atacarán al acabar tu turno.';
  if(game.mode==='p2p-host')sendGuestSnapshot();
  const focus=selected?card(selected.id):CARDS[0]; // Evita que la vista previa salte de carta cada vez que renderizamos.

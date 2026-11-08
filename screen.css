@@ -1,0 +1,203 @@
+/* BARBARIDADES 0.4 — Single-screen duel layout.
+   This file intentionally overrides only presentation from styles.css.
+   No page-level scrolling: all active controls live inside the viewport. */
+:root{--header-h:clamp(40px,6.5dvh,58px);--card-hand-w:clamp(106px,11.5vw,148px)}
+html{height:100%;overflow:hidden;overscroll-behavior:none}
+body{height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none}
+.shell{
+  width:100%;max-width:none;height:100%;height:100dvh;
+  display:grid;grid-template-rows:var(--header-h) minmax(0,1fr);
+  padding:0 clamp(7px,1.3vw,20px);overflow:hidden
+}
+.topbar{height:100%;min-height:0;margin:0;padding:0 3px}
+.topbar .brand-icon{height:clamp(30px,4.6dvh,40px);width:clamp(30px,4.6dvh,40px);font-size:26px}
+.topbar .brand strong{font-size:clamp(20px,2.6vw,27px)}
+.topbar .brand small{font-size:clamp(6px,.8vw,8px)}
+.topbar .btn{min-height:29px;padding:6px 9px;font-size:clamp(12px,1.3vw,15px)}
+.layout{
+  display:grid;grid-template-columns:clamp(170px,18vw,245px) minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);gap:8px;
+  min-height:0;height:100%;overflow:hidden;padding:7px 0 8px
+}
+.main-panel{min-width:0;min-height:0;display:grid;grid-template-rows:min-content minmax(0,1fr) clamp(142px,29dvh,235px);gap:6px;overflow:hidden}
+.arena-heading{margin:0;min-height:0;gap:8px}
+.arena-heading h1{font-size:clamp(21px,2.4vw,30px);margin:1px 0 0}
+.arena-heading .eyebrow{font-size:8px}
+.round-tag{padding:5px 8px;font-size:11px}
+.left-panel{min-height:0;overflow:hidden;display:grid;grid-template-rows:min-content minmax(0,1fr);gap:8px}
+.left-panel .panel{min-height:0;padding:11px 10px;overflow:hidden}
+.left-panel .panel h2{font-size:clamp(16px,1.8vw,22px);margin:5px 0 7px}
+.left-panel .panel.help{display:none}
+.left-panel .scale{margin:9px 0 7px}
+.left-panel .scale span{height:15px}
+.left-panel .log{max-height:none;height:calc(100% - 37px);font-size:10px;gap:7px;overflow-y:auto}
+.right-panel{display:none}
+.footer{display:none}
+.board{
+  min-height:0;height:100%;
+  display:grid;
+  grid-template-rows: minmax(28px,.38fr) 12px minmax(0,2fr) 15px minmax(0,2fr) 12px minmax(28px,.38fr);
+  gap:1px;padding:5px 9px;margin:0;overflow:hidden
+}
+.board .player-strip{min-height:0;height:100%;margin:0;padding:3px 7px;border-radius:6px;gap:7px}
+.board .player-circle{height:25px;flex-basis:25px;font-size:16px;border-radius:5px}
+.board .person b{font-size:15px;line-height:1.0}
+.board .person span{font-size:8px}
+.board .energy-readout b{font-size:21px;line-height:1}
+.board .energy-readout small{font-size:8px}
+.board .zone-caption{min-height:0;padding:0 5px;align-items:center;font-size:8px;line-height:1}
+.board .battle-marker{min-height:0;margin:0;font-size:10px;line-height:1}
+.board .battle-marker span{font-size:11px}
+.lanes{min-height:0;height:100%;gap:clamp(3px,.5vw,8px)}
+.lane{min-height:0;max-height:100%;height:100%;width:100%;aspect-ratio:auto;padding:2px;border-radius:6px;overflow:hidden}
+.lane .empty-mark b{font-size:24px}
+.board .card-piece{max-width:clamp(92px,17dvh,165px);min-height:0;height:100%;padding:3px;gap:2px;border-width:2px;border-radius:5px}
+.board .card-piece .card-top{min-height:25px;flex:0 0 auto;padding:2px 4px}
+.board .card-heading{font-size:clamp(11px,1.2vw,15px);line-height:1}
+.board .card-piece .cost-bubble{min-width:20px;width:20px;height:20px;font-size:11px;border-width:1px}
+.board .card-piece .card-art{flex:1;min-height:0;height:auto;border-width:1px}
+.board .card-piece .card-bottom{flex:0 0 auto;min-height:17px;padding:1px 3px}
+.board .card-piece .card-stats{font-size:15px}
+.board .card-piece .card-kind{display:none}
+.board .card-piece .status{font-size:9px;padding:1px}
+.hand-panel{
+  min-height:0;height:100%;display:grid;grid-template-rows:min-content minmax(0,1fr) min-content;
+  padding:7px 10px 6px;margin:0;overflow:hidden;border-radius:10px;gap:3px
+}
+.hand-heading{min-height:0;margin:0;align-items:center}
+.hand-heading .eyebrow{display:none}
+.hand-heading h2{font-size:20px;margin:0}
+.hand-heading p{font-size:10px;line-height:1.2;max-width:52%;max-height:2.6em;overflow:hidden;text-align:right}
+.hand{
+  position:relative;display:block;min-height:0;height:100%;overflow:visible;
+  padding:0;margin:0;isolation:isolate;--hand-card-w:var(--card-hand-w)
+}
+.hand-card{
+  position:absolute;bottom:0;left:var(--pos,0%);translate:var(--shift,0%) 0;
+  width:var(--hand-card-w);height:100%;min-width:0;max-width:none;
+  flex:none;border:0;padding:0;margin:0;
+  transform-origin:50% 100%;z-index:var(--stack,1);
+  transition:transform .15s ease,filter .15s ease
+}
+.hand-card .card-piece{height:100%;min-height:0;max-height:100%;padding:3px;gap:2px}
+.hand-card .card-piece .card-top{min-height:24px;padding:3px 4px}
+.hand-card .card-heading{font-size:clamp(12px,1.18vw,16px)}
+.hand-card .cost-bubble{width:20px;height:20px;min-width:20px;font-size:11px}
+.hand-card .card-art{min-height:0;flex:1;max-height:none;border-width:1px}
+.hand-card .card-kind{display:none}
+.hand-card .card-description{flex:0 1 auto;min-height:0;max-height:3em;overflow:hidden;font-size:clamp(7px,.9dvh,10px);line-height:1.14;padding-top:3px}
+.hand-card .card-bottom{flex:0 0 auto;min-height:17px;padding-top:1px}
+.hand-card .card-stats{font-size:15px}
+.hand-card:hover,.hand-card:focus-visible{transform:translateY(-6px);z-index:100}
+.hand-card.selected{transform:translateY(-9px);z-index:110}
+.hand-card .card-piece.inactive{opacity:.77;filter:grayscale(.1)}
+.hand-card.is-dealt{animation:card-deal .44s cubic-bezier(.16,.8,.32,1.05) both;animation-delay:var(--deal-delay,0ms)}
+.hand-card.is-dealt.selected{animation:none}
+@keyframes card-deal{
+  0%{opacity:0;transform:translate(0,-65%) rotate(-9deg) scale(.65);filter:brightness(2)}
+  55%{opacity:1;transform:translate(0,2%) rotate(3deg) scale(1.04)}
+  100%{opacity:1;transform:translate(0,0) rotate(0) scale(1);filter:brightness(1)}
+}
+.turn-actions{min-height:0;flex:none;border-top:1px solid #2e415b;padding-top:5px;gap:6px}
+.turn-actions p{font-size:9px;line-height:1.15;max-height:2.3em;overflow:hidden}
+.turn-actions .btn{min-height:30px;padding:5px 10px;font-size:15px}
+.turn-actions .primary{min-width:154px}
+.turn-actions .primary span{margin-left:5px}
+@media(max-height:750px){
+  .main-panel{grid-template-rows:min-content minmax(0,1fr) clamp(127px,27dvh,195px)}
+  .hand-card .card-description{display:none}
+  .hand-card .card-art{flex:1}
+}
+@media(max-width:850px){
+  :root{--header-h:42px;--card-hand-w:clamp(96px,31vw,133px)}
+  .shell{padding:0 6px}
+  .topbar .brand small{display:none}
+  .topbar .brand strong{font-size:clamp(18px,5.2vw,23px)}
+  .topbar .brand-icon{width:30px;height:30px;font-size:22px}
+  .topbar .series{display:none}
+  .topbar .top-actions .btn{font-size:12px;padding:5px 6px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:31px minmax(0,1fr);gap:3px;padding:3px 0 5px}
+  .left-panel{grid-column:1;grid-row:1;display:block;height:31px;min-height:0;overflow:hidden}
+  .left-panel .panel:not(:first-child){display:none}
+  .left-panel .panel:first-child{
+    display:flex;align-items:center;justify-content:space-between;gap:6px;
+    height:31px;min-height:0;padding:3px 8px;border-radius:6px
+  }
+  .left-panel .panel:first-child .eyebrow,.left-panel .panel:first-child h2{display:none}
+  .left-panel .panel:first-child .scale{flex:1;min-width:86px;max-width:210px;margin:0;gap:2px}
+  .left-panel .panel:first-child .scale span{height:14px}
+  .left-panel .panel:first-child .secondary{font-size:9px;line-height:1.1;max-width:45%;text-align:right}
+  .main-panel{grid-column:1;grid-row:2;min-height:0;width:100%;
+    display:grid;grid-template-rows:min-content minmax(0,1fr) clamp(154px,30dvh,231px);gap:3px}
+  .arena-heading{min-height:23px}
+  .arena-heading .eyebrow{display:none}
+  .arena-heading h1{font-size:clamp(20px,5.4vw,26px)}
+  .round-tag{padding:4px 6px;font-size:10px}
+  .board{padding:3px 4px;grid-template-rows:minmax(26px,.37fr) 10px minmax(0,2fr) 12px minmax(0,2fr) 10px minmax(26px,.37fr)}
+  .board .player-strip{padding:2px 4px}
+  .board .person b{font-size:13px}
+  .board .person span{font-size:7px}
+  .board .energy-readout small{display:none}
+  .board .energy-readout b{font-size:18px}
+  .board .player-circle{height:22px;flex-basis:22px;font-size:13px}
+  .board .zone-caption{font-size:7px}
+  .board .card-piece{max-width:100%;padding:2px}
+  .board .card-piece .card-top{min-height:23px;padding:2px}
+  .board .card-heading{font-size:clamp(9px,2.8vw,13px)}
+  .board .card-piece .cost-bubble{min-width:17px;width:17px;height:17px;font-size:9px}
+  .board .card-piece .card-stats{font-size:13px}
+  .board .card-piece .card-bottom{min-height:16px}
+  .hand-panel{padding:5px 5px}
+  .hand-heading h2{font-size:18px}
+  .hand-heading p{font-size:9px;max-width:55%}
+  .hand-card .card-piece .card-top{min-height:25px}
+  .hand-card .card-description{display:none}
+  .turn-actions .primary{min-width:130px}
+  .turn-actions .btn{font-size:13px}
+}
+@media(max-height:520px) and (orientation:landscape){
+  :root{--header-h:35px;--card-hand-w:clamp(82px,12vw,117px)}
+  .shell{padding:0 5px}
+  .topbar .brand strong{font-size:18px}
+  .layout{grid-template-columns:132px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:5px;padding:2px 0}
+  .left-panel{grid-row:1;grid-column:1;height:100%}
+  .left-panel .panel:first-child{height:auto;display:block;padding:7px}
+  .left-panel .panel:first-child .eyebrow,.left-panel .panel:first-child h2{display:block;font-size:12px;margin:2px}
+  .left-panel .panel:first-child .scale{max-width:100%;margin:4px 0}
+  .left-panel .panel:first-child .secondary{max-width:none;text-align:left}
+  .main-panel{grid-row:1;grid-column:2;grid-template-rows:min-content minmax(0,1fr) clamp(102px,32dvh,132px);gap:2px}
+  .arena-heading{min-height:20px}
+  .arena-heading h1{font-size:18px}
+  .board{grid-template-rows:22px 7px minmax(0,2fr) 9px minmax(0,2fr) 7px 22px}
+  .board .zone-caption{font-size:6px}
+  .board .player-strip{padding:1px 3px}
+  .board .player-circle{height:18px;flex-basis:18px;font-size:10px}
+  .board .person b{font-size:11px}
+  .board .person span{display:none}
+  .board .card-piece .card-top{min-height:16px}
+  .board .card-heading{font-size:9px}
+  .board .card-piece .card-art{min-height:0}
+  .hand-heading p,.turn-actions p{display:none}
+  .hand-card .card-piece .card-top{min-height:20px}
+}
+@media(prefers-reduced-motion:reduce){
+ .hand-card.is-dealt{animation:none}
+ .hand-card{transition:none}
+}
+
+/* QA fixes from 320px portrait + short landscape Chromium smoke tests. */
+.layout,.main-panel,.board,.hand-panel,.topbar{min-width:0}
+.topbar{width:100%;max-width:100%;overflow:hidden}
+.topbar .brand{min-width:0;flex:0 1 auto;overflow:hidden}
+.topbar .top-actions{flex:0 0 auto;gap:3px}
+.hand{overflow:clip}
+.turn-actions{position:relative;z-index:210;background:#142139}
+@media(max-width:375px){
+  .topbar .brand strong{font-size:16px;letter-spacing:0}
+  .topbar #rules,.topbar #collection{
+    width:27px;min-width:27px;height:29px;font-size:0;padding:0;
+  }
+  .topbar #rules::before{content:"?";font-size:17px}
+  .topbar #collection::before{content:"▤";font-size:16px}
+  .topbar #reset{width:27px;min-width:27px;padding:0}
+}
