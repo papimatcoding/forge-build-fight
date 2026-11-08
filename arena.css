@@ -273,3 +273,10 @@ html,body{height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none}
  .turn-actions .primary{min-height:27px!important;height:27px!important}
  .board{grid-template-rows:19px 7px minmax(0,1fr) 7px minmax(0,1fr) 7px 19px!important}
 }
+
+
+/* The original layout's "align-items:start" made the interactive game use
+   only ~60% of available height even though scrolling was disabled.
+   Stretch the actual game grid, leaving real height for both battlefields. */
+.layout{align-items:stretch!important}
+.main-panel{align-self:stretch!important;height:100%!important;min-height:0!important}
