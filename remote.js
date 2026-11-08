@@ -21,7 +21,7 @@ export function isRemoteCommand(value,expectedSequence){
  const command=value.action;
  return command&&(
   command.type==="end"||
-  command.type==="play"&&typeof command.uid==="string"&&command.uid.length<100&&
+  command.type==="play"&&typeof command.uid==="string"&&command.uid.length>0&&command.uid.length<100&&
   (command.lane===null||Number.isInteger(command.lane)&&command.lane>=0&&command.lane<4)
  );
 }
