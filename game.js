@@ -1,8 +1,10 @@
 import {CARDS,CARDS_BY_ID,BLOCK,RULES,CANVA_SERIES_I_URL} from './cards.js';
+import {ManualPeer,isRemoteCommand} from './remote.js';
 const $=id=>document.getElementById(id);
 const random=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let session=0,game=null,selected=null,logs=[],modalOpen=true,thinking=false;
+let peer=null,remotePending=false,lastSnapshot=0,version=0;
 const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const draw=()=>({uid:uid(),id:random(CARDS).id});
 const playerName=i=>'JUGADOR '+(i+1);
@@ -12,7 +14,8 @@ const other=()=>game.players[1-game.current];
 const lc=(text)=>{logs.unshift(text);logs=logs.slice(0,9);};
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),2400);}
 function newGame(mode){
- session++;selected=null;thinking=false;logs=[];modalOpen=false;
+ if(peer&&mode!=='p2p-host'){peer.close();peer=null;}
+ session++;selected=null;thinking=false;logs=[];modalOpen=false;remotePending=false;lastSnapshot=0;version=0;
  game={mode,current:0,turns:0,score:0,finished:false,players:[0,1].map(()=>({energy:0,hand:Array.from({length:RULES.startingHand},draw),board:Array(RULES.lanes).fill(null),freeTurn:false,focusTargetId:null}))};
  lc('Empieza el duelo. La dignidad queda fuera del tablero.');
  enterTurn();closeModal();render();
@@ -30,7 +33,7 @@ function enterTurn(){
    u.hat=!u.hat;
    u.attack=u.hat?2:4;
    u.maxHealth=u.hat?3:2;
-   u.health=u.maxHealth-lost;
+   u.health=Math.max(1,u.maxHealth-lost);
    u.shield=u.hat?1:0;
    lc('Perry se '+(u.hat?'pone el gorro de agente (2/3 y protección).':'quita el gorro (4/2 y sin protección).'));
    if(u.health<=0)damage(game.current,i,999,'crisis de identidad');
@@ -126,7 +129,7 @@ function playCard(player,handUid,lane=null){
   if(target==='friend'&&info.type==='unit'&&p.board[lane])return false;
   if(target==='friend'&&info.type==='spell'&&!p.board[lane])return false;
   if(target==='friendCancer'&&(!p.board[lane]||!p.board[lane].cancer))return false;
-  if(target==='enemy'&&(!game.players[1-player].board[lane]||game.players[1-player].board[lane].cancer))return false;
+  if(target==='enemy'&&(!game.players[1-player].board[lane]||(info.effect==='cancer'&&game.players[1-player].board[lane].cancer)))return false;
   if(info.effect==='hyper'&&!p.board.some(u=>u&&u.attack>0))return false;
  }
  p.energy-=cost;p.hand.splice(idx,1);selected=null;
@@ -203,8 +206,13 @@ function applyDiseases(player){
   else lc(card(u.id).name+' tiene '+u.cancer+' turno(s) antes de morir por Cáncer.');
  }
 }
-function endTurn(){
- if(!game||game.finished||modalOpen||thinking)return;
+function endTurn(fromRemote=false){
+ if(!game||game.finished||modalOpen&&!fromRemote||thinking)return;
+ if(game.mode==='p2p-guest'){
+  if(game.current!==1||remotePending||!peer?.sendCommand({type:'end'}))return;
+  remotePending=true;render();return;
+ }
+ if(game.mode==='p2p-host'&&game.current!==0&&!fromRemote)return;
  const player=game.current;
  if(game.turns>=RULES.openingTurnsWithoutAttack)attackStep(player);
  else lc('⏳ Fase de preparación: sin ataques todavía.');
@@ -220,7 +228,7 @@ function win(player){
  game.finished=true;selected=null;thinking=false;
  render();
  showModal('VICTORIA DE '+playerName(player),'ESTO DEBERÍA SER ILEGAL','La balanza ha llegado a 5 puntos de ventaja. Se exige revancha.',[
-  {label:'REVANCHA',action:'rematch',primary:true},{label:'CAMBIAR MODO',action:'select-mode'}
+  ...(game.mode==='p2p-host'?[{label:'NUEVA SALA PARA REVANCHA',action:'select-mode',primary:true}]:[{label:'REVANCHA',action:'rematch',primary:true}]),{label:'CAMBIAR MODO',action:'select-mode'}
  ]);
 }
 function showModal(title,kicker,text,buttons,extra=''){
@@ -230,10 +238,105 @@ function showModal(title,kicker,text,buttons,extra=''){
 }
 function closeModal(){modalOpen=false;$('modal').classList.add('hidden');}
 function showSetup(){
- showModal('NO HAY <em>MARCHA ATRÁS.</em>','BIENVENIDO A BARBARIDADES','Elige cómo quieres probar la Serie I. Las partidas online todavía no están implementadas.',[
- {label:'1V1 LOCAL · MISMO DISPOSITIVO',action:'local',primary:true},{label:'JUGAR CONTRA LA CPU',action:'cpu'}
- ],'<p class="secondary">4 carriles · 3 energía por turno · 5 puntos para ganar · robo aleatorio.</p>');
+ if(peer){peer.close();peer=null;}remotePending=false;
+ showModal('NO HAY <em>MARCHA ATRÁS.</em>','BIENVENIDO A BARBARIDADES','Elige cómo probar la Serie I: mismo dispositivo, contra la CPU o entre dos dispositivos con conexión P2P.',[
+ {label:'1V1 · DOS DISPOSITIVOS (P2P)',action:'online',primary:true},
+ {label:'1V1 LOCAL · MISMO DISPOSITIVO',action:'local'},
+ {label:'JUGAR CONTRA LA CPU',action:'cpu'}
+ ],'<p class="secondary">El modo P2P usa WebRTC sin servidor de salas: tendrás que intercambiar una oferta y una respuesta con tu amigo. Algunas redes móviles no permiten conexión directa.</p>');
 }
+function showOnline(){
+ showModal('DOS DISPOSITIVOS <em>UN DUELO.</em>','P2P EXPERIMENTAL','Necesitáis abrir esta web en ambos dispositivos y compartir dos códigos por mensaje. El anfitrión controla el estado de la partida.',[
+ {label:'CREAR SALA (JUGADOR 1)',action:'host-offer',primary:true},
+ {label:'UNIRSE (JUGADOR 2)',action:'join-room'},
+ {label:'VOLVER',action:'select-mode'}
+ ],'<p class="secondary">P2P WebRTC cifrado. Puede exponer la dirección IP pública al amigo; no hay servidor TURN ni reconexión automática. No compartas códigos con desconocidos.</p>');
+}
+function peerState(status){
+ if(status==='connected'){
+  remotePending=false;
+  if(game?.mode==='p2p-host'){closeModal();sendGuestSnapshot();render();}
+  else if(game?.mode==='p2p-guest'){closeModal();render();}
+  else toast('P2P conectado. Esperando partida.');
+ }
+ if(['failed','disconnected','error','protocol-error'].includes(status)){
+  remotePending=true;
+  showModal('CONEXIÓN <em>INTERRUMPIDA</em>','P2P · '+status.toUpperCase(),'No se puede continuar esta partida sin el otro jugador. Volved a crear una sala.',[{label:'VOLVER AL MENÚ',action:'select-mode',primary:true}]);
+ }
+}
+function safeGuestSnapshot(){
+ if(!game||game.mode!=='p2p-host')return null;
+ return {mode:'p2p-guest',turns:game.turns,current:game.current,score:game.score,finished:game.finished,
+ players:game.players.map((p,i)=>({
+  energy:p.energy,board:p.board,hand:i===1?p.hand.map(h=>({...h})):Array.from({length:p.hand.length},()=>({id:null,uid:null})),
+  freeTurn:p.freeTurn,focusTargetId:p.focusTargetId
+ })),log:logs.slice()};
+}
+function sendGuestSnapshot(){
+ if(game?.mode==='p2p-host'&&peer?.channel?.readyState==='open')
+  peer.send({type:'snapshot',version:++version,state:safeGuestSnapshot()});
+}
+function remoteMessage(message){
+ if(!message||typeof message!=='object')return;
+ if(message.type==='snapshot'&&message.state?.mode==='p2p-guest'&&peer&&game?.mode!=='p2p-host'){
+  if(!Number.isSafeInteger(message.version)||message.version<=lastSnapshot)return;
+  const next=message.state;
+  if(!Array.isArray(next.players)||next.players.length!==2||!Array.isArray(next.players[0].hand)||!Array.isArray(next.players[1].hand))return;
+  if(next.players[0].hand.some(h=>h.id!==null||h.uid!==null))return; // No private cards of host.
+  if(![0,1].includes(next.current)||next.players.some(p=>!Array.isArray(p.board)||p.board.length!==4))return;
+  lastSnapshot=message.version;game=next;logs=Array.isArray(next.log)?next.log.slice(0,9):[];
+  selected=null;remotePending=false;thinking=false;closeModal();render();
+  if(game.finished)showModal('FIN DE PARTIDA <em>P2P</em>','RESULTADO','Ha ganado '+playerName(game.score>0?0:1)+'. Para la revancha, cread otra sala.',[{label:'VOLVER AL MENÚ',action:'select-mode',primary:true}]);
+  return;
+ }
+ if(message.type==='command'&&game?.mode==='p2p-host'&&peer&&isRemoteCommand(message,peer.expectedSeq+1)){
+  peer.expectedSeq=message.seq;
+  if(game.finished||game.current!==1){sendGuestSnapshot();return;}
+  const action=message.action;
+  if(action.type==='play')playCard(1,action.uid,action.lane);
+  if(action.type==='end')endTurn(true);
+  sendGuestSnapshot(); // ACK even when move is invalid.
+ }
+}
+async function hostOffer(){
+ try{
+  newGame('p2p-host');
+  showModal('CREANDO <em>SALA...</em>','P2P','Recopilando candidatos de conexión. No cierres esta pantalla.',[{label:'CANCELAR',action:'select-mode'}]);
+  peer=new ManualPeer({onMessage:remoteMessage,onState:peerState});
+  const code=await peer.createOffer();
+  showModal('OFERTA <em>PREPARADA</em>','PASO 1 / ANFITRIÓN','Copia esta oferta y envíasela a tu amigo. Cuando te devuelva su respuesta, pégala debajo.',[
+   {label:'APLICAR RESPUESTA',action:'apply-answer',primary:true},{label:'CANCELAR',action:'select-mode'}
+  ],'<label class="signal-label">TU OFERTA · ENVÍASELA A TU AMIGO</label><textarea class="signal-code" id="host-offer-code" readonly></textarea><button class="btn ghost signal-copy" data-copy="host-offer-code">COPIAR OFERTA</button><label class="signal-label">RESPUESTA DEL INVITADO</label><textarea class="signal-code" id="host-answer-code" placeholder="Pega aquí la respuesta..."></textarea>');
+  $('host-offer-code').value=code;
+ }catch(error){toast(error.message);showOnline();}
+}
+function joinPrompt(){
+ showModal('UNIRSE <em>A LA SALA</em>','PASO 1 / INVITADO','Pide al anfitrión su oferta y pégala aquí. Después obtendrás tu respuesta.',[
+  {label:'GENERAR RESPUESTA',action:'make-answer',primary:true},{label:'VOLVER',action:'online'}
+ ],'<label class="signal-label">OFERTA DEL ANFITRIÓN</label><textarea class="signal-code" id="guest-offer-code" placeholder="Pega aquí la oferta que te han enviado"></textarea>');
+}
+async function makeAnswer(){
+ try{
+  const code=$('guest-offer-code')?.value?.trim();
+  if(!code)throw Error('Pega primero la oferta.');
+  if(peer)peer.close();
+  peer=new ManualPeer({onMessage:remoteMessage,onState:peerState});
+  const answer=await peer.acceptOffer(code);
+  showModal('RESPUESTA <em>LISTA</em>','PASO 2 / INVITADO','Envía este código al anfitrión. Cuando lo pegue, la partida comenzará automáticamente.',[
+   {label:'CANCELAR',action:'select-mode'}
+  ],'<label class="signal-label">TU RESPUESTA · ENVÍALA AL ANFITRIÓN</label><textarea class="signal-code" id="guest-answer-code" readonly></textarea><button class="btn ghost signal-copy" data-copy="guest-answer-code">COPIAR RESPUESTA</button>');
+  $('guest-answer-code').value=answer;
+ }catch(error){toast(error.message);joinPrompt();}
+}
+async function applyAnswer(){
+ try{
+  const code=$('host-answer-code')?.value?.trim();
+  if(!code)throw Error('Pega primero la respuesta del invitado.');
+  await peer.acceptAnswer(code);
+  showModal('CONECTANDO <em>LOS DOS</em>','P2P','Estableciendo un canal directo y cifrado. Si falla la conexión, probad en otra red.',[{label:'CANCELAR',action:'select-mode'}]);
+ }catch(error){toast(error.message);}
+}
+
 function showHandoff(){
  showModal('LE TOCA AL <em>'+playerName(game.current)+'</em>','PASAD EL DISPOSITIVO','El siguiente jugador puede ver su mano cuando pulse el botón.',[
  {label:'SOY '+playerName(game.current)+' · MOSTRAR MI MANO',action:'ready',primary:true}
@@ -290,13 +393,14 @@ function canvaUrl(c){
 }
 function cardHtml(c,unit=null,variant='hand'){
  const stats=c.type==='unit'?'<div class="card-stats"><span>⚔ '+(unit?unit.attack:c.attack)+'</span><span>♥ '+(unit?unit.health:c.health)+'</span></div>':'<div class="spell-stats">EFECTO</div>';
- const active=variant==='hand'&&game&&modifiedCost(c,game.current)<=own().energy&&eligible(c,game.current);
+ const view=game?.mode==='p2p-host'?0:game?.mode==='p2p-guest'?1:game?.current;
+ const active=variant==='hand'&&game&&game.current===view&&!remotePending&&modifiedCost(c,view)<=game.players[view].energy&&eligible(c,view);
  const badges=unit?(unit.cancer?'<span class="status cancer">🦠 '+unit.cancer+'</span>':'')+(unit.stun?'<span class="status">💫</span>':'')+(unit.shield?'<span class="status">🕵️</span>':'')+(unit.cheese?'<span class="status">🧀'+unit.cheese+'</span>':''):'';
  const artIcon=unit&&c.id==='perry'?(unit.hat?'🕵️':'🦦'):c.icon;
  return '<div class="card-piece '+c.type+' '+variant+(variant==='hand'&&!active?' inactive':'')+'" style="--art-hue:'+c.hue+'">'
-   +'<div class="card-top"><span class="cost-bubble">⚡'+(variant==='hand'&&game?modifiedCost(c,game.current):c.cost)+'</span><span class="set-tag">SERIE I</span></div>'
-   +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+artIcon+'</span><span class="art-rays">✷</span></div>'
-   +'<div class="card-name">'+c.name+'</div><div class="card-kind">'+c.kind+'</div>'
+   +'<div class="card-top"><span class="card-heading">'+escapeHtml(c.name)+'</span><span class="cost-bubble">⚡'+(variant==='hand'&&game?modifiedCost(c,view):c.cost)+'</span></div>'
+   +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+artIcon+'</span><span class="art-rays">✷</span>'+(c.image?'<img class="card-art-image" src="'+c.image+'" alt="'+escapeHtml(c.alt)+'" loading="lazy" onerror="this.remove()">':'')+'</div>'
+   +'<div class="card-kind">'+c.kind.toUpperCase()+' · SERIE I</div>'
    +(variant==='board'?'':('<p class="card-description">'+c.text+'</p>'))
    +'<div class="card-bottom">'+stats+badges+'</div></div>';
 }
@@ -313,10 +417,12 @@ function renderSlots(target,player,isOwn){
 }
 function render(){
  if(!game)return;
- const me=own(),rival=other();
- $('own-name').textContent=playerName(game.current)+(game.mode==='cpu'&&game.current===1?' · CPU':'');
- $('enemy-name').textContent=playerName(1-game.current);
- $('own-avatar').textContent='0'+(game.current+1);$('enemy-avatar').textContent='0'+(2-game.current);
+ const view=game.mode==='p2p-host'?0:game.mode==='p2p-guest'?1:game.current;
+ const me=game.players[view],rival=game.players[1-view];
+ const myTurn=game.current===view;
+ $('own-name').textContent=playerName(view)+(game.mode==='cpu'&&view===1?' · CPU':'');
+ $('enemy-name').textContent=playerName(1-view);
+ $('own-avatar').textContent='0'+(view+1);$('enemy-avatar').textContent='0'+(2-view);
  $('own-hand-count').textContent=me.hand.length+' cartas en mano';$('enemy-hand').textContent=rival.hand.length+' cartas en mano';
  $('own-energy').textContent=me.energy;$('enemy-energy').textContent=rival.energy;
  $('hand-count').textContent='('+me.hand.length+')';
@@ -326,14 +432,16 @@ function render(){
  $('scale').innerHTML=ranges.map(v=>'<span class="'+(v===0?'center ':v>0&&game.score>=v?'p1 ':v<0&&game.score<=v?'p2 ':'')+'"></span>').join('');
  $('scale-label').textContent=game.score===0?'BALANZA EQUILIBRADA':(game.score>0?'JUGADOR 1':'JUGADOR 2')+' VA GANANDO POR '+Math.abs(game.score);
  $('log').innerHTML=logs.map(x=>'<li>'+escapeHtml(x)+'</li>').join('');
- renderSlots('enemy-lanes',1-game.current,false);renderSlots('own-lanes',game.current,true);
+ renderSlots('enemy-lanes',1-view,false);renderSlots('own-lanes',view,true);
  const cpuThinking=game.mode==='cpu'&&game.current===1;
+ const waiting=(game.mode==='p2p-host'||game.mode==='p2p-guest')&&!myTurn;
  $('hand').innerHTML=cpuThinking?'<div class="no-cards">La CPU está pensando una atrocidad...</div>':me.hand.map(h=>'<button class="hand-card '+(selected?.uid===h.uid?'selected':'')+'" data-hand="'+h.uid+'">'+cardHtml(card(h.id),null,'hand')+'</button>').join('');
  if(!me.hand.length&&!cpuThinking)$('hand').innerHTML='<div class="no-cards">No tienes cartas en la mano. Robarás al empezar tu siguiente turno.</div>';
  $('cancel').hidden=!selected;
- $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking;
+ $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking||waiting||remotePending;
  $('instruction').textContent=selected?'Objetivo de '+card(selected.id).name+': '+(card(selected.id).type==='unit'?'coloca en un carril libre':card(selected.id).target==='enemy'?'selecciona un enemigo':'selecciona una criatura aliada'):'Selecciona una carta para jugarla.';
- $('hint').textContent=game.turns<2?'No se ataca durante los dos primeros turnos.':'Tus criaturas atacarán al acabar tu turno.';
+ $('hint').textContent=waiting?'ES EL TURNO DE TU RIVAL · ESPERA':remotePending?'ESPERANDO CONFIRMACIÓN DEL ANFITRIÓN':game.turns<2?'No se ataca durante los dos primeros turnos.':'Tus criaturas atacarán al acabar tu turno.';
+ if(game.mode==='p2p-host')sendGuestSnapshot();
  const focus=selected?card(selected.id):CARDS[0]; // Evita que la vista previa salte de carta cada vez que renderizamos.
  $('featured-name').textContent=focus.name;
  $('featured').innerHTML=cardHtml(focus,null,'feature-card');
@@ -342,31 +450,46 @@ function render(){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));}
 function chooseHand(uidValue){
- if(!game||modalOpen||thinking||game.finished||game.mode==='cpu'&&game.current===1)return;
+ if(!game||modalOpen||thinking||game.finished||remotePending||game.mode==='cpu'&&game.current===1)return;
+ if(game.mode==='p2p-host'&&game.current!==0||game.mode==='p2p-guest'&&game.current!==1)return;
  if(selected?.uid===uidValue){selected=null;render();return;}
- const h=own().hand.find(x=>x.uid===uidValue);if(!h)return;
- const info=card(h.id),cost=modifiedCost(info,game.current);
- if(cost>own().energy){toast('Necesitas '+cost+' de energía.');return;}
- if(!eligible(info,game.current)){toast('No hay objetivos válidos para esta carta.');return;}
- if(info.type==='spell'&&!info.target){playCard(game.current,uidValue);return;}
+ const activePlayer=game.mode==='p2p-guest'?1:game.current;
+ const h=game.players[activePlayer].hand.find(x=>x.uid===uidValue);if(!h)return;
+ const info=card(h.id),cost=modifiedCost(info,activePlayer);
+ if(cost>game.players[activePlayer].energy){toast('Necesitas '+cost+' de energía.');return;}
+ if(!eligible(info,activePlayer)){toast('No hay objetivos válidos para esta carta.');return;}
+ if(info.type==='spell'&&!info.target){requestPlay(uidValue);return;}
  selected=h;render();
+}
+function requestPlay(uidValue,lane=null){
+ if(game?.mode==='p2p-guest'){
+  if(!peer?.sendCommand({type:'play',uid:uidValue,lane})){toast('Conexión P2P no disponible.');return false;}
+  remotePending=true;selected=null;render();return true;
+ }
+ return playCard(game.current,uidValue,lane);
 }
 function chooseLane(side,lane){
  if(!selected||modalOpen||thinking||game.finished)return;
  const info=card(selected.id);
  const target=info.type==='unit'?'friend':info.target;
  if(side==='own'&&(target==='friend'||target==='friendCancer')||side==='enemy'&&target==='enemy'){
-  if(!playCard(game.current,selected.uid,lane))toast('No puedes usar esa carta ahí.');
+  if(!requestPlay(selected.uid,lane))toast('No puedes usar esa carta ahí.');
  }else toast('Selecciona un objetivo del campo correcto.');
 }
 document.addEventListener('click',event=>{
+ const copy=event.target.closest('[data-copy]');if(copy){const area=$(copy.dataset.copy);if(area){navigator.clipboard.writeText(area.value).then(()=>toast('Código copiado')).catch(()=>{area.select();document.execCommand('copy');toast('Código copiado');});}return;}
  const hand=event.target.closest('[data-hand]');if(hand){chooseHand(hand.dataset.hand);return;}
  const lane=event.target.closest('[data-lane]');if(lane){chooseLane(lane.dataset.side,Number(lane.dataset.lane));return;}
  const action=event.target.closest('[data-modal]');if(action){
   const a=action.dataset.modal;
   if(a==='local'||a==='cpu')newGame(a);
   if(a==='ready'||a==='close') {closeModal();render();}
-  if(a==='rematch')newGame(game?.mode||'local');
+  if(a==='online')showOnline();
+  if(a==='host-offer')hostOffer();
+  if(a==='join-room')joinPrompt();
+  if(a==='make-answer')makeAnswer();
+  if(a==='apply-answer')applyAnswer();
+  if(a==='rematch')newGame(game?.mode==='p2p-host'||game?.mode==='p2p-guest'?'local':game?.mode||'local');
   if(a==='select-mode')showSetup();
   if(a==='canva'&&CANVA_SERIES_I_URL)window.open(CANVA_SERIES_I_URL,'_blank','noopener');
  }

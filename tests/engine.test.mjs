@@ -3,18 +3,20 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
 import {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL} from "../cards.js";
+import {ManualPeer,isRemoteCommand} from "../remote.js";
 
 function harness(){
  const els=new Map();
  const create=()=>({innerHTML:"",textContent:"",href:"",hidden:false,disabled:false,style:{},classList:{add(){},remove(){}},addEventListener(){}});
  const document={getElementById(id){if(!els.has(id))els.set(id,create());return els.get(id);},addEventListener(){}};
- const context={document,window:{open(){}},setTimeout:()=>1,clearTimeout(){},console,Math,
+ const context={document,window:{open(){}},setTimeout:()=>1,clearTimeout(){},console,Math,ManualPeer,isRemoteCommand,
    __cards:{CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}};
  vm.createContext(context);
  const script=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8")
-  .replace(/^import[^\n]*\n/,"const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;");
- const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
- vm.runInContext(script+expose,context);
+  .replace(/^import[^\n]*\n/gm,"");
+ const globals="const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;";
+ const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
+ vm.runInContext(globals+script+expose,context);
  const api=context.testApi;api.newGame("local");return api;
 }
 
@@ -23,7 +25,8 @@ test("16 cards with valid costs and Canva references",()=>{
  assert.equal(new Set(CARDS.map(c=>c.id)).size,16);
  assert.deepEqual(CARDS.map(c=>c.canvaPage),Array.from({length:16},(_,i)=>i+1));
  assert.match(CANVA_SERIES_I_URL,/canva\.com/);
- assert.equal(CARDS_BY_ID.raul.name,"Beca MEC");
+ assert.equal(CARDS_BY_ID.raul.name,"Raúl Becas y Ayudas");
+ assert.equal(CARDS_BY_ID.raul.abilityName,"Beca MEC");
  for(const c of CARDS){assert.ok(c.cost>=0);if(c.type==="unit"){assert.ok(c.health>0);assert.ok(c.attack>=0);}}
 });
 
@@ -90,4 +93,15 @@ test("Cancer counts three victim turns and Quimio cures it",()=>{
  t.playCard(0,t.give(0,"cancer"),1);t.current(1);t.energy(1,10);
  assert.equal(t.playCard(1,t.give(1,"chemo"),1),true);
  assert.equal(t.getGame().players[1].board[1].cancer,0);
+});
+
+test("P2P host transmits only the guest hand, never its own hidden cards",()=>{
+ const t=harness();t.newGame("p2p-host");
+ const live=t.getGame(),view=t.safeGuestSnapshot();
+ assert.equal(view.mode,"p2p-guest");
+ assert.equal(view.players[0].hand.length,live.players[0].hand.length);
+ assert.ok(view.players[0].hand.every(h=>h.id===null&&h.uid===null));
+ assert.ok(view.players[1].hand.every(h=>typeof h.id==="string"&&typeof h.uid==="string"));
+ assert.equal(view.players[0].board.length,4);
+ assert.equal(view.players[1].board.length,4);
 });

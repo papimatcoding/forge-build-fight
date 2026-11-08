@@ -1,0 +1,36 @@
+name: Verify Barbaridades engine and art
+
+on:
+  push:
+    branches:
+      - feature/serie-i-real-art-p2p
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: npm run check
+      - name: Game rules and P2P tests
+        run: npm test
+      - name: Validate all 16 Canva art assets
+        run: |
+          node --input-type=module <<'JS'
+          import {CARDS} from './cards.js';
+          import {existsSync} from 'node:fs';
+          for(const c of CARDS){
+            const assets=[c.image,c.image.replace('.png','-256.png'),c.fullImage];
+            for(const file of assets)if(!existsSync(file))throw Error('Missing art '+c.name+' '+file);
+          }
+          console.log('All 16 cards have 3 PNG files.');
+          JS

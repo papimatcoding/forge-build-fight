@@ -1,0 +1,103 @@
+{
+  "source": "Canva portrait page thumbnails, not full-resolution exports",
+  "design_id": "DAHaVy260BU",
+  "expires": "2026-11-08",
+  "pages": [
+    {
+      "index": 1,
+      "id": "duck",
+      "url": "https://media.canva.com/v2/document-image/hash:-282299468/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAB242nLllR5_VOi31RpHv4Crx3sVv-xIwt4jN7DqjmyT&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T040130Z%26X-Amz-Expires%3D45696%26X-Amz-Signature%3Dcdef1e30768b524e035837f65145eb2834955995a34e9bd2f9104b0abc645ae5%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252016%253A43%253A06%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAMjAI7f05H8Ero8tMDLZ19wepk0juzmnoJG_J7JxS64T&page=1&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 2,
+      "id": "grandma",
+      "url": "https://media.canva.com/v2/document-image/hash:998619719/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAABj4cRPmoUkdY8Z4wuRim5BZeYo_XmnPhspamlaEiMPb&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0002.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T094315Z%26X-Amz-Expires%3D28352%26X-Amz-Signature%3D4c0451df44a0388f239b598c02047e37988faa09384f7ef21e077f72d381740b%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A35%253A47%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAADZmJCPHHtMDBivA2_fwhId8nt1KsqvoZLnq4tIBZKov&page=2&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 3,
+      "id": "sahur",
+      "url": "https://media.canva.com/v2/document-image/hash:-1243119717/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAADcaNhgEukj-jcFVM5mIq1X9-D5W4EbNROojNcHaZb5A&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0003.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T045404Z%26X-Amz-Expires%3D44746%26X-Amz-Signature%3Dc262b51a083cd2fbcf5b3606c462972c41d7e9a13c68c97484505f08ad041917%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A19%253A50%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAACLQIMPaDD7WdiGanWTrOXRKK57OsT4E1M3VBzqSolML&page=3&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 4,
+      "id": "trancas",
+      "url": "https://media.canva.com/v2/document-image/hash:1935147622/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAE1NSyyAmCXkIwdD8UzJRwytsHixOLqadvg1wIC2c1hw&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0004.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261107%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261107T214958Z%26X-Amz-Expires%3D69914%26X-Amz-Signature%3D4db94e0e67e1e7dacfdf456c0438a39c85ab284c25bd4dca4c85e330c5fd304a%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A15%253A12%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAE20PC9yTteP3QaZTQFyGc9bmTq8ofRMecGwBiOI-Csr&page=4&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 5,
+      "id": "pereira",
+      "url": "https://media.canva.com/v2/document-image/hash:27302703/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAEUIxD919Nm-KUCNub8s0esaHLb2fPsjpJcvSGEOE-Cq&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0005.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T075816Z%26X-Amz-Expires%3D31421%26X-Amz-Signature%3Db8aa6344f5eeb1dc070db18b67ff6b742643c1bee6f797199d35b71c9b5f26f3%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252016%253A41%253A57%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAHueAhBEWn2e7gG5zZecDvYO5d6hhLepaaDfl0MJuqJQ&page=5&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 6,
+      "id": "cancer",
+      "url": "https://media.canva.com/v2/document-image/hash:-1114454306/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAACGfxfyD1ryZhKFTBobGieug5gj9FixMeSKEhV9PDPsI&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0006.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261107%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261107T234041Z%26X-Amz-Expires%3D63486%26X-Amz-Signature%3D910381031261967ca461892e885ada85cbef59463d2890d22f837f44f13088fc%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A18%253A47%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAOAQHqEBMItC5q6KOxqp_DHQT9l-dqdySCb7acKE13Vg&page=6&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 7,
+      "id": "chemo",
+      "url": "https://media.canva.com/v2/document-image/hash:649011567/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAM0pVGES40OIqg-5dziW0b0YOvu0qCpLeneOG_hGHD9L&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0007.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T024257Z%26X-Amz-Expires%3D53491%26X-Amz-Signature%3D938c231aa70a8e75e9a4b557a5aa5cabb225ababc2cbc04ea880b707e57f1f7e%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A34%253A28%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAOglS5L6S0phhlagyRJ4_J9MAH6KhteSrNDzOK6MkHFK&page=7&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 8,
+      "id": "taxoffice",
+      "url": "https://media.canva.com/v2/document-image/hash:-537697843/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAEKq5xRRTBV1fmMoOiAE7TuCHlG_CtwhXXwv-kCOlGH_&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0008.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T081203Z%26X-Amz-Expires%3D33558%26X-Amz-Signature%3Da892adf3a5dc81e7cd663df5b11226193cd207dc94cae1f2ec20db13134b5eea%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A31%253A21%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAP33m7iSyTEe37gxZY0ezZ-HzJI8feksikkNiorUU6Wd&page=8&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 9,
+      "id": "inspector",
+      "url": "https://media.canva.com/v2/document-image/hash:-37710578/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAGJs9WLJCX0AEqkILjfqDpq83uAVi0AavMF_jPAKmqyV&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0009.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261107%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261107T224803Z%26X-Amz-Expires%3D65108%26X-Amz-Signature%3D5b89b37a4a97284d12d967582c700b643f7a3a57959572e2447bfb0f8f67c2b5%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252016%253A53%253A11%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAMgZh0EzutBeq4Cn9BqNCFGcyimGbObrR7pVNTLounpZ&page=9&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 10,
+      "id": "raul",
+      "url": "https://media.canva.com/v2/document-image/hash:-1918715272/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAEDKC8YO-8zgx6ZD0o7YT5IYipcAGxs2rSJYCgxDIzqI&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0010.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261107%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261107T191450Z%26X-Amz-Expires%3D78881%26X-Amz-Signature%3D1ed731c6a7a9c48ed210c51a78607331c696bd5deecd8f702b364309e964c0dd%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A09%253A31%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAP5CZxnauKpiov2l7SNjX2S9ivB4eEMvuyBMIC-alpCQ&page=10&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 11,
+      "id": "sixseven",
+      "url": "https://media.canva.com/v2/document-image/hash:345815438/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAPJjkBER_8t-WKBEf7-9Q0pNftmJzS-cgfDTB0B-_W0x&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0011.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T130631Z%26X-Amz-Expires%3D16209%26X-Amz-Signature%3D567e7aea400730e6a142594ae48b9f4d1de36022b50f2156fdffa5697ea5522d%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A36%253A40%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAA9ZzZ6gtshBLBJAjM7M2k0Uw7QAz8UdkVd4pz0lYC4x&page=11&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 12,
+      "id": "piratetoken",
+      "url": "https://media.canva.com/v2/document-image/hash:-168513668/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAANM2IHNWg_vqPzxiB-pQzRxEUSWYau4YcOGW4yEXEaec&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0012.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261107%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261107T214236Z%26X-Amz-Expires%3D69154%26X-Amz-Signature%3Dcfa0003ece78643e127f7d036810b873f0c4e52ae7575d23ebf4a1ce72f13fd4%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252016%253A55%253A10%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAMS0aoqgcfWtYPApnPv_6WSp-bO3U8BBgmM24d-yST0d&page=12&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 13,
+      "id": "perry",
+      "url": "https://media.canva.com/v2/document-image/hash:-1992542741/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAFzP-Ra2gh0AHVbp_qITLjI6DmP3neO37dG7U6aH5-g6&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0013.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T152155Z%26X-Amz-Expires%3D8061%26X-Amz-Signature%3D567d1a49990a13ca8499145822f5f51041f7dac29f07ab61174e00a1d705fcfc%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A36%253A16%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAALvVUdNZtM2EUnSEgRuTEzK6DySdO2ym5bab8nLA-VVH&page=13&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 14,
+      "id": "hyper",
+      "url": "https://media.canva.com/v2/document-image/hash:564508790/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAO9lGlXEqcYTbHsmJEmGmIwvmbt9XSYADU_UPbbVe8Ut&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0014.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T025313Z%26X-Amz-Expires%3D52619%26X-Amz-Signature%3Dbc0e76cc92c86e5156e3a4c1d736c7c148fac29bfcb156fe1b54753b9e8ac73d%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A30%253A12%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAE-9fhhavT9vqiK572Bv_Y9G1i0aRcgld8udP9QsZyAs&page=14&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 15,
+      "id": "steve",
+      "url": "https://media.canva.com/v2/document-image/hash:2138571026/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAP9PzLex10KoRJPKeneJU_rpS20Xk0bbgH6eihkXTnwP&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0015.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T083344Z%26X-Amz-Expires%3D32261%26X-Amz-Signature%3D580d84b7f99e71b7832900116fd159e1863b350ac627fac7ea40bed883c0fafd%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252017%253A31%253A25%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAMdMzPURoaQXu_GGl-2UU-kltJ15UEBLeo-u3I3Gg6fJ&page=15&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    },
+    {
+      "index": 16,
+      "id": "cow",
+      "url": "https://media.canva.com/v2/document-image/hash:1448166789/height:524/id:DAHaVy260BU/type:B/width:381?brand=BAD9KPCvNyM&csig=AAAAAAAAAAAAAAAAAAAAAE4DAnlEghb7jmUFCmMaUc9ulPoQgfRAdA1KrkXFCN8D&exp=1794158563&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F260BU%2FDAHaVy260BU%2F1%2Fthumbnail%2F0016.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHW27RK5IK%252F20261108%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20261108T010505Z%26X-Amz-Expires%3D56768%26X-Amz-Signature%3D34c1647ad0f886d5382f15f9147321b3c446d16ce3411ddead5649baba4194be%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DSun%252C%252008%2520Nov%25202026%252016%253A51%253A13%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAAIrcnQ6MPzmjp6i-cY7SVG7pNH74PkuDbhF3SGDwUIXb&page=16&signed=brand%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1",
+      "design": "DAHaVy260BU"
+    }
+  ]
+}
