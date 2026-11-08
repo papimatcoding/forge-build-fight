@@ -15,7 +15,7 @@ function harness(){
  const script=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8")
   .replace(/^import[^\n]*\n/gm,"");
  const globals="const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;";
- const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,render,shownHand:()=>document.getElementById('hand').innerHTML,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
+ const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,render,shownHand:()=>document.getElementById("hand").innerHTML,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
  vm.runInContext(globals+script+expose,context);
  const api=context.testApi;api.newGame("local");return api;
 }
