@@ -62,3 +62,258 @@
  .board .card-piece .card-kind{display:none}
  .hand-card{flex-basis:139px}
 }
+
+
+/* ================================================================
+   v0.4 — ONE-SCREEN MATCH LAYOUT
+   The match itself NEVER page-scrolls. Only optional modals scroll.
+   Works in narrow portrait and landscape without forcing rotation.
+   Preserve canonical text + existing Canva artwork from cards.js.
+   ================================================================ */
+html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+body{touch-action:manipulation}
+.shell{
+  width:100%;max-width:none;height:100vh;height:100dvh;min-height:0;
+  padding:0 clamp(5px,1vw,16px) max(3px,env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.topbar{
+  flex:0 0 clamp(37px,5.4dvh,58px);height:auto;min-height:0;
+  gap:9px;padding:2px clamp(2px,.6vw,9px);
+}
+.brand{gap:7px;min-width:0}
+.brand-icon{height:clamp(26px,4.1dvh,38px);width:clamp(26px,4.1dvh,38px);font-size:clamp(22px,3dvh,28px);flex:none;border-radius:8px}
+.brand strong{font-size:clamp(19px,3dvh,27px)}
+.brand small{font-size:clamp(6px,1dvh,8px)}
+.top-actions{gap:clamp(3px,.6vw,8px);flex:none}
+.top-actions .btn{min-height:clamp(27px,3.6dvh,34px);padding:3px clamp(6px,.85vw,13px);font-size:clamp(11px,1.8dvh,14px)}
+.series{font-size:9px}
+.layout{
+  display:flex;justify-content:center;align-items:stretch;flex:1;
+  padding:clamp(2px,.5dvh,6px) 0 0;gap:0;min-height:0;min-width:0;
+}
+.left-panel,.right-panel{display:none!important}
+.main-panel{
+  height:100%;width:min(100%,1100px);max-width:1100px;
+  display:grid;
+  grid-template-rows:clamp(30px,5.5dvh,48px) minmax(0,1fr) clamp(123px,24dvh,214px);
+  gap:clamp(3px,.6dvh,7px);
+  min-height:0;min-width:0;margin-inline:auto;overflow:hidden;
+}
+.arena-heading{
+  min-height:0;min-width:0;margin:0;padding:0 clamp(2px,.4vw,6px);
+  display:flex;align-items:center;justify-content:space-between;gap:clamp(4px,1vw,12px);
+}
+.arena-heading>div:first-child{min-width:0;flex:1}
+.arena-heading .eyebrow{display:none}
+.arena-heading h1{margin:0;font-size:clamp(19px,3.5dvh,33px);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.round-tag{min-height:0;padding:6px 9px;font-size:clamp(9px,1.55dvh,12px);letter-spacing:.025em;flex:none}
+.hud-score{
+  display:flex;flex-direction:column;gap:2px;justify-content:center;
+  align-items:center;min-width:clamp(76px,12vw,127px);flex:none;
+}
+.hud-scale{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:2px;width:100%}
+.hud-scale span{height:clamp(6px,1.15dvh,10px);border:1px solid #4c5b72;border-radius:2px;background:#2f4058}
+.hud-scale span.p1{background:#ff9a65;border-color:#ffb982}
+.hud-scale span.p2{background:#7dc4e5;border-color:#a9ddf5}
+.hud-scale span.center{background:#c3c7cf;border-color:#d9e3e9}
+.hud-score strong{font:800 clamp(9px,1.7dvh,12px)/1 "Barlow Condensed";color:#ffdaaf;letter-spacing:.1em}
+.board{
+  width:min(100%,810px);height:100%;min-height:0;min-width:0;
+  display:grid;grid-template-rows:
+    clamp(25px,4.3dvh,38px)
+    clamp(8px,1.6dvh,12px)
+    minmax(0,1fr)
+    clamp(9px,1.8dvh,16px)
+    minmax(0,1fr)
+    clamp(8px,1.6dvh,12px)
+    clamp(25px,4.3dvh,38px);
+  padding:clamp(3px,.5dvh,7px) clamp(4px,.7vw,10px);
+  gap:0;margin:0 auto;border-radius:10px;overflow:hidden;
+}
+.player-strip{
+  align-self:stretch;display:flex;align-items:center;
+  min-height:0;min-width:0;padding:0 clamp(6px,1vw,10px);
+  margin:0;gap:clamp(5px,1vw,9px);border-radius:6px;
+}
+.player-circle{height:clamp(20px,3.5dvh,29px);flex:0 0 clamp(20px,3.5dvh,29px);font-size:clamp(13px,2.3dvh,19px);border-radius:6px}
+.person b{font-size:clamp(12px,2dvh,17px);line-height:1.0}
+.person span{font-size:clamp(7px,1.2dvh,9px);line-height:1.0}
+.energy-readout{gap:4px}
+.energy-readout b{font-size:clamp(18px,3.4dvh,26px)}
+.energy-readout small{font-size:8px}
+.zone-caption{padding:0 clamp(3px,.6vw,8px);margin:0;display:flex;align-items:center;font-size:clamp(7px,1dvh,9px)}
+.lanes{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(3px,.8vw,10px);height:100%;min-height:0;
+  align-items:center;justify-content:stretch;
+}
+.lane{
+  aspect-ratio:auto;align-self:center;
+  width:100%;height:min(100%,30dvh,calc((100vw - 44px) / 4 * 1.65));
+  min-height:0;min-width:0;padding:clamp(2px,.4vw,5px);
+  border-radius:8px;overflow:hidden;
+}
+.battle-marker{margin:0;line-height:1;font-size:clamp(8px,1.5dvh,11px)}
+.battle-marker span{font-size:clamp(11px,1.9dvh,15px)}
+.board .card-piece{width:100%;height:100%;min-height:0;overflow:hidden;gap:2px;padding:3px}
+.board .card-piece .card-top{min-height:clamp(18px,3dvh,30px);padding:1px 3px;flex:none}
+.board .card-heading{font-size:clamp(9px,1.45dvh,14px);line-height:1.0;min-width:0}
+.board .card-piece .cost-bubble{min-width:clamp(17px,2.9dvh,23px);width:clamp(17px,2.9dvh,23px);height:clamp(17px,2.9dvh,23px);font-size:clamp(9px,1.7dvh,12px);border-width:1px}
+.board .card-piece .card-art{flex:1;min-height:0;height:auto;border-width:1px}
+.board .card-piece .card-bottom{flex:none;min-height:clamp(14px,2dvh,20px);padding:1px 0 0}
+.board .card-piece .card-stats{font-size:clamp(12px,2.3dvh,18px)}
+.board .card-piece .card-kind{display:none}
+.board .card-piece .card-icon{font-size:clamp(17px,4.5dvh,44px)}
+.hand-panel{
+  height:100%;min-height:0;min-width:0;display:flex;flex-direction:column;
+  margin:0;padding:clamp(4px,.8dvh,9px) clamp(4px,.8vw,10px);
+  border-radius:10px;position:relative;overflow:visible;
+}
+.hand-heading{
+  flex:0 0 clamp(21px,3.5dvh,29px);min-height:0;margin:0;
+  display:flex;align-items:center;gap:6px;
+}
+.hand-heading .eyebrow{display:none}
+.hand-heading h2{font-size:clamp(16px,2.9dvh,23px);margin:0;white-space:nowrap}
+.hand-heading p{
+  flex:1;min-width:0;max-width:none;display:block;
+  font-size:clamp(9px,1.5dvh,11px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.deck-marker{display:flex;align-items:center;gap:5px;flex:none;color:#f1ca90;font:800 10px "Barlow Condensed";letter-spacing:.04em}
+.deck-back{display:grid;place-items:center;width:23px;height:27px;border:2px solid #d6ae6a;border-radius:4px;background:#2d2854;box-shadow:2px -2px 0 #5b4087;font-size:17px}
+.deck-marker.drawing .deck-back{animation:deck-shuffle .72s ease both}
+.hand{
+  flex:1;min-height:0;min-width:0;
+  display:flex;align-items:stretch;justify-content:center;gap:clamp(2px,.6vw,7px);
+  overflow:hidden;overflow-y:clip;
+  padding:clamp(4px,1dvh,9px) 3px 3px;margin:0;
+}
+.hand-card{
+  flex:0 0 auto;width:clamp(90px,min(12vw,24dvh),147px);
+  height:100%;min-height:0;min-width:0;
+  margin-left:clamp(-60px,calc((5 - var(--hand-count,3))*12px),0px);
+  padding:0;border:0;position:relative;
+  transform-origin:50% 100%;
+  transition:transform .16s,filter .16s;will-change:transform;
+}
+.hand-card:first-child{margin-left:0}
+.hand-card:hover,.hand-card:focus-visible{transform:translateY(-4px);z-index:12}
+.hand-card.selected{transform:translateY(-5px);z-index:13}
+.hand-card.dealing{
+  animation:deal-card .52s cubic-bezier(.16,.85,.21,1.06) both;
+  animation-delay:calc(var(--deal-index,0)*115ms);
+}
+.hand-card .card-piece{
+  display:flex;flex-direction:column;min-height:0;height:100%;
+  padding:clamp(2px,.45dvh,5px);gap:2px;border-width:2px;
+}
+.hand-card .card-top{min-height:clamp(20px,3.4dvh,29px);padding:2px 3px;flex:none}
+.hand-card .card-heading{font-size:clamp(10px,1.9dvh,14px)}
+.hand-card .cost-bubble{min-width:clamp(17px,2.8dvh,23px);height:clamp(17px,2.8dvh,23px);width:clamp(17px,2.8dvh,23px);font-size:clamp(10px,1.7dvh,13px)}
+.hand-card .card-art{flex:1;min-height:0;height:auto;border-width:1px}
+.hand-card .card-kind{display:none}
+.hand-card .card-description{
+  font-size:clamp(8px,1.25dvh,10px);line-height:1.15;
+  min-height:0;max-height:34px;flex:0 0 auto;overflow:hidden;padding-top:2px;border-top-width:1px;
+}
+.hand-card .card-bottom{flex:none;min-height:clamp(15px,2.3dvh,21px);padding-top:1px}
+.hand-card .card-stats{font-size:clamp(12px,2.2dvh,17px)}
+.hand-card .card-icon{font-size:clamp(23px,5dvh,47px)}
+.turn-actions{
+  flex:0 0 clamp(27px,4.4dvh,40px);min-height:0;
+  display:flex;align-items:center;gap:6px;
+  padding:clamp(2px,.3dvh,4px) 2px 0;margin:0;border-top:1px solid #2d435c;
+}
+.turn-actions p{
+  min-width:0;flex:1;font-size:clamp(8px,1.4dvh,11px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.turn-actions .btn{min-height:clamp(25px,3.7dvh,35px);padding:3px clamp(7px,1.4vw,13px);font-size:clamp(12px,2dvh,17px)}
+.turn-actions .primary{min-width:clamp(132px,17vw,187px)}
+.turn-actions .primary span{margin-left:5px}
+.card-detail{
+  position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);
+  z-index:16;width:max-content;max-width:min(90vw,460px);
+  background:#101a2ef5;border:1px solid #f1ae68;border-radius:8px;
+  color:#fff2d9;font-size:clamp(11px,1.8dvh,13px);line-height:1.35;
+  padding:8px 12px;text-align:center;box-shadow:0 4px 18px #0206129a;
+  pointer-events:none;
+}
+.card-detail[hidden]{display:none}
+.footer,footer{display:none!important}
+@keyframes deal-card{
+  0%{opacity:0;transform:translate3d(28px,-52px,0) rotate(12deg) rotateY(65deg) scale(.62);filter:brightness(.6)}
+  57%{opacity:1;transform:translate3d(5px,3px,0) rotate(-3deg) rotateY(0deg) scale(1.04);filter:brightness(1.2)}
+  100%{opacity:1;transform:translate3d(0,0,0) rotate(0) rotateY(0) scale(1);filter:none}
+}
+@keyframes deck-shuffle{20%{transform:rotate(-11deg) translateY(-5px)}50%{transform:rotate(10deg) translateY(-4px)}100%{transform:rotate(0)}}
+@media(max-width:700px){
+  .topbar{gap:4px}
+  .brand strong{font-size:clamp(18px,3.1dvh,24px)}
+  .top-actions .btn{padding-inline:5px}
+  .series{display:none}
+  .main-panel{grid-template-rows:clamp(29px,5dvh,42px) minmax(0,1fr) clamp(132px,23dvh,206px)}
+  .arena-heading h1{font-size:clamp(17px,3dvh,27px)}
+  .round-tag{padding:5px 6px;font-size:9px}
+  .hud-score{min-width:72px}
+  .hand-card{width:clamp(94px,26vw,116px);margin-left:clamp(-84px,calc((3 - var(--hand-count,3))*14px),0px)}
+  .hand-card:first-child{margin-left:0}
+  .hand-heading p{display:none}
+}
+@media(max-width:480px){
+  .brand small{display:none}
+  .brand-icon{width:27px;height:27px;font-size:22px}
+  .arena-heading h1{font-size:clamp(16px,3.2dvh,24px)}
+  .hud-score strong{font-size:10px}
+  .board{padding-inline:4px}
+  .board .card-heading{font-size:clamp(9px,1.5dvh,12px)}
+  .board .card-piece .cost-bubble{min-width:18px;width:18px;height:18px;font-size:10px}
+  .turn-actions p{display:none}
+  .turn-actions .primary{margin-left:auto}
+}
+@media(max-height:560px){
+  .topbar{flex-basis:clamp(31px,8dvh,41px)}
+  .brand small,.top-actions .series{display:none}
+  .main-panel{grid-template-rows:clamp(26px,7dvh,34px) minmax(0,1fr) clamp(112px,30dvh,141px);gap:2px}
+  .arena-heading h1{font-size:clamp(17px,5dvh,23px)}
+  .board{grid-template-rows:24px 7px minmax(0,1fr) 8px minmax(0,1fr) 7px 24px;padding:2px 4px}
+  .person span,.energy-readout small{display:none}
+  .player-strip{padding:0 5px}
+  .person b{font-size:12px}
+  .energy-readout b{font-size:20px}
+  .board .card-piece .card-top{min-height:15px}
+  .board .card-heading{font-size:clamp(9px,2dvh,11px)}
+  .board .card-piece .cost-bubble{height:15px;width:15px;min-width:15px;font-size:9px}
+  .board .card-piece .card-bottom{min-height:11px}
+  .board .card-piece .card-stats{font-size:12px}
+  .board .card-piece .card-art{min-height:0}
+  .hand-heading{flex-basis:19px}
+  .hand-heading h2{font-size:16px}
+  .hand-card .card-description,.hand-card .card-kind{display:none}
+  .hand-card .card-top{min-height:19px}
+  .hand-card .card-bottom{min-height:13px}
+  .hand-card .card-art{min-height:0}
+  .turn-actions{flex-basis:27px;padding-top:2px}
+  .turn-actions .btn{min-height:25px;font-size:13px}
+  .turn-actions p{font-size:9px}
+  .deck-marker{font-size:9px}
+  .deck-back{height:19px;width:17px;font-size:12px}
+}
+@media(max-height:350px) and (orientation:landscape){
+  .main-panel{grid-template-rows:25px minmax(0,1fr) 100px}
+  .brand-icon{width:22px;height:22px}
+  .brand strong{font-size:18px}
+  .topbar{flex-basis:30px}
+  .hand-card{width:90px}
+  .hand-heading{flex-basis:15px}
+  .hand-heading h2{font-size:13px}
+  .turn-actions{flex-basis:23px}
+  .turn-actions .btn{min-height:22px}
+  .board .card-art{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .hand-card.dealing,.deck-marker.drawing .deck-back{animation:none}
+  .hand-card,.lane{transition:none}
+}
