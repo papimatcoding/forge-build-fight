@@ -13,7 +13,7 @@ export const RULES = {
   victoryLead:5,
   openingTurnsWithoutAttack:2,
 };
-export const CARDS=[
+export const SERIES_I=[
   {id:"duck",name:"Pato metralleta",type:"unit",cost:4,attack:3,health:2,kind:"mutante",icon:"🦆",hue:40,effect:"triple",text:"Dispara tres veces con 1 de daño por disparo."},
   {id:"grandma",name:"Abuela con chancla",type:"unit",cost:3,attack:2,health:4,kind:"leyenda urbana",icon:"👵",hue:20,effect:"slipper",text:"Su primer chanclazo inflige +2 de daño a una criatura."},
   {id:"sahur",name:"Tung Tung Tung Sahur",type:"unit",cost:5,attack:4,health:3,kind:"brainrot",icon:"🪵",hue:24,effect:"stun",text:"Al entrar, aturde al rival de enfrente durante su próximo ataque."},
@@ -37,5 +37,163 @@ export const CARDS=[
  fullImage:"./assets/cards/"+card.id+"-full.png",
  alt:card.name+" — ilustración de Serie I"
 }));
+export const SERIES_II = [
+  {
+    "id": "curse",
+    "name": "Maldición gitana",
+    "type": "spell",
+    "cost": 3,
+    "kind": "mala suerte",
+    "icon": "🔮",
+    "hue": 283,
+    "effect": "hex",
+    "target": "enemy",
+    "text": "Mala suerte: la criatura rival pierde 2 de ataque en sus próximos 2 ataques. Sin asociar la magia a ninguna etnia."
+  },
+  {
+    "id": "alonso",
+    "name": "Alonso Mazza",
+    "type": "unit",
+    "cost": 3,
+    "attack": 2,
+    "health": 4,
+    "kind": "carisma",
+    "icon": "🤝",
+    "hue": 34,
+    "effect": "cheer",
+    "text": "Consejos de Alonso: al entrar, cura 1 vida a cada aliado vecino."
+  },
+  {
+    "id": "cartel",
+    "name": "Cartel Mexicano",
+    "type": "spell",
+    "cost": 3,
+    "kind": "contrabando",
+    "icon": "📦",
+    "hue": 22,
+    "effect": "contraband",
+    "text": "Llegó el cargamento: roba 2 criaturas del mazo de combate, si tienes espacio."
+  },
+  {
+    "id": "agustin51",
+    "name": "Agustín51",
+    "type": "unit",
+    "cost": 4,
+    "attack": 3,
+    "health": 3,
+    "kind": "streamer",
+    "icon": "🌭",
+    "hue": 13,
+    "effect": "squad",
+    "text": "Escuadrón Salchichón: +1 daño al atacar si tiene algún aliado vecino."
+  },
+  {
+    "id": "renfe",
+    "name": "Renfe",
+    "type": "spell",
+    "cost": 2,
+    "kind": "transporte",
+    "icon": "🚆",
+    "hue": 189,
+    "effect": "delay",
+    "target": "enemy",
+    "text": "Disculpen el retraso: la criatura rival pierde su próximo ataque."
+  },
+  {
+    "id": "kirk",
+    "name": "Charlie Kirk",
+    "type": "unit",
+    "cost": 3,
+    "attack": 1,
+    "health": 4,
+    "kind": "debate",
+    "icon": "🎙️",
+    "hue": 225,
+    "effect": "debate",
+    "text": "Debate interminable: reduce en 1 el ataque de la criatura enemiga de enfrente mientras permanezca aquí."
+  },
+  {
+    "id": "tralalero",
+    "name": "Tralalero Tralala",
+    "type": "unit",
+    "cost": 4,
+    "attack": 3,
+    "health": 3,
+    "kind": "brainrot",
+    "icon": "🦈",
+    "hue": 191,
+    "effect": "sneakers",
+    "text": "Zapatillas supersónicas: tras atacar, inflige 1 daño al enemigo del carril vecino de la derecha."
+  },
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "type": "spell",
+    "cost": 4,
+    "kind": "inteligencia artificial",
+    "icon": "🤖",
+    "hue": 162,
+    "effect": "ai",
+    "text": "Respuesta larguísima: roba una criatura y un efecto. Puede inventarse una estrategia, pero no las cartas."
+  },
+  {
+    "id": "hustle304",
+    "name": "HustleHard304",
+    "type": "unit",
+    "cost": 4,
+    "attack": 3,
+    "health": 4,
+    "kind": "influencer",
+    "icon": "✊",
+    "hue": 40,
+    "effect": "hustle",
+    "text": "Puños arriba: al entrar, obtienes +1 energía. ¡Sin descanso!"
+  },
+  {
+    "id": "perrosanchez",
+    "name": "Perro Sánchez",
+    "type": "unit",
+    "cost": 3,
+    "attack": 2,
+    "health": 3,
+    "kind": "política meme",
+    "icon": "🐕",
+    "hue": 10,
+    "effect": "coalition",
+    "text": "Coalición: +1 de ataque mientras tenga un aliado en un carril vecino."
+  },
+  {
+    "id": "broncano",
+    "name": "David Broncano",
+    "type": "spell",
+    "cost": 3,
+    "kind": "entrevista",
+    "icon": "🎤",
+    "hue": 291,
+    "effect": "bank",
+    "text": "¿Dinero en el banco?: copia hasta 3 de la energía rival, sin quitársela."
+  },
+  {
+    "id": "capybara",
+    "name": "Capibara",
+    "type": "unit",
+    "cost": 2,
+    "attack": 1,
+    "health": 5,
+    "kind": "zen",
+    "icon": "🦫",
+    "hue": 82,
+    "effect": "relax",
+    "text": "Paz absoluta: después de atacar, recupera 1 punto de vida."
+  }
+].map((card,index)=>({
+ ...card,series:"II",canvaPage:index+1,
+ // Editable SVG starter art keeps Serie I's identical HTML card frame.
+ image:"./assets/cards/series2/"+card.id+".svg",
+ alt:card.name+" — ilustración provisional Serie II"
+}));
+export const CARDS=[...SERIES_I,...SERIES_II];
+export const COMBAT_CARDS=CARDS.filter(c=>c.type==="unit");
+export const EFFECT_CARDS=CARDS.filter(c=>c.type==="spell");
 export const CARDS_BY_ID=Object.fromEntries(CARDS.map(card=>[card.id,card]));
 export const BLOCK={id:"block",name:"Bloque de tierra",type:"unit",cost:0,attack:0,health:3,kind:"construcción",icon:"🟫",hue:31,effect:"none",text:"Un bloque que ocupa espacio. Steve se cree arquitecto.",series:"I",canvaPage:16};
