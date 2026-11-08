@@ -317,3 +317,9 @@ body{touch-action:manipulation}
   .hand-card.dealing,.deck-marker.drawing .deck-back{animation:none}
   .hand-card,.lane{transition:none}
 }
+
+/* Responsive overlap measured from the actual hand width; no invalid CSS calc arithmetic. */
+.hand-card,.hand-card:not(:first-child){margin-left:var(--hand-shift,0px)}
+.hand-card:first-child{margin-left:0}
+.turn-actions .btn.cast{min-width:0;border:1px solid #ffc77d;background:#5d355b;color:#ffe5ad;font-size:clamp(11px,1.75dvh,14px);padding-inline:7px}
+@media(max-width:480px){.turn-actions .btn.cast{font-size:10px;padding-inline:5px}}
