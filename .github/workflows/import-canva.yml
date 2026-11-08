@@ -50,5 +50,17 @@ jobs:
           git add assets/cards
           if ! git diff --cached --quiet; then
             git commit -m "assets: import 16 Canva cards as permanent PNG files [assets-sync]"
-            git push origin HEAD:feature/serie-i-real-art-p2p
+            # Other game changes may land while the 16 PNGs are being generated.
+            # Rebase the independent asset commit on the latest feature head.
+            for attempt in 1 2 3 4 5 6 7 8; do
+              git fetch origin feature/serie-i-real-art-p2p
+              git rebase origin/feature/serie-i-real-art-p2p
+              if git push origin HEAD:feature/serie-i-real-art-p2p; then
+                echo "Canva PNGs published"
+                exit 0
+              fi
+              sleep 3
+            done
+            echo "Could not fast-forward the asset commit" >&2
+            exit 1
           fi
