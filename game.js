@@ -444,7 +444,16 @@ function render(){
  const waiting=(game.mode==='p2p-host'||game.mode==='p2p-guest')&&!myTurn;
  const canDeal=!modalOpen&&!cpuThinking&&!waiting&&!remotePending&&!game.finished;
  const revealed=seenHand[view];let dealStep=0;
- $('hand').style.setProperty('--hand-count',String(me.hand.length));
+ const handElement=$('hand');
+ const vWidth=Number.isFinite(window.innerWidth)?window.innerWidth:1100;
+ const vHeight=Number.isFinite(window.innerHeight)?window.innerHeight:750;
+ const available=Math.max(100,handElement.clientWidth||vWidth-24);
+ const mobile=vWidth<=700;
+ const cardWidth=mobile?Math.min(116,Math.max(94,vWidth*.26)):Math.min(147,Math.max(90,Math.min(vWidth*.12,vHeight*.24)));
+ const gap=mobile?3:7;
+ const shift=me.hand.length<2?0:Math.min(cardWidth-29,Math.max(0,((cardWidth+gap)*me.hand.length-gap-available)/(me.hand.length-1)));
+ handElement.style?.setProperty?.('--hand-count',String(me.hand.length));
+ handElement.style?.setProperty?.('--hand-shift',(-shift)+'px');
  $('hand').innerHTML=cpuThinking?'<div class="no-cards">La CPU está pensando una atrocidad...</div>':me.hand.map(h=>{
   const fresh=canDeal&&!revealed.has(h.uid);
   if(fresh)revealed.add(h.uid);
@@ -452,10 +461,12 @@ function render(){
   const order=fresh?dealStep++:0;
   return '<button class="hand-card'+animation+(selected?.uid===h.uid?' selected':'')+'" style="--deal-index:'+order+'" data-hand="'+h.uid+'" aria-label="'+escapeHtml(card(h.id).name)+'">'+cardHtml(card(h.id),null,'hand')+'</button>';
  }).join('');
- const deck=$('deck-marker');deck.classList.toggle('drawing',dealStep>0);
+ const deck=$('deck-marker');
+ if(dealStep>0)deck.classList.add('drawing');else deck.classList.remove('drawing');
  if(dealStep>0)setTimeout(()=>deck.classList.remove('drawing'),850+dealStep*120);
  if(!me.hand.length&&!cpuThinking)$('hand').innerHTML='<div class="no-cards">No tienes cartas en la mano. Robarás al empezar tu siguiente turno.</div>';
  $('cancel').hidden=!selected;
+ $('cast-selected').hidden=!(selected&&card(selected.id).type==='spell'&&!card(selected.id).target);
  $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking||waiting||remotePending;
  $('instruction').textContent=selected?('JUEGA '+card(selected.id).name+' · '+(card(selected.id).type==='unit'?'elige carril libre':card(selected.id).target==='enemy'?'elige enemigo':'elige aliado')):'Elige una carta y después un carril.';
  const detail=$('card-detail');
@@ -479,7 +490,7 @@ function chooseHand(uidValue){
  const info=card(h.id),cost=modifiedCost(info,activePlayer);
  if(cost>game.players[activePlayer].energy){toast('Necesitas '+cost+' de energía.');return;}
  if(!eligible(info,activePlayer)){toast('No hay objetivos válidos para esta carta.');return;}
- if(info.type==='spell'&&!info.target){requestPlay(uidValue);return;}
+ // First tap selects any card so its full effect is legible; untargeted spells require confirmation.
  selected=h;render();
 }
 function requestPlay(uidValue,lane=null){
@@ -517,6 +528,8 @@ document.addEventListener('click',event=>{
 });
 $('end-turn').addEventListener('click',endTurn);
 $('cancel').addEventListener('click',()=>{selected=null;render();});
+$('cast-selected').addEventListener('click',()=>{if(selected)requestPlay(selected.uid);});
+window.addEventListener?.('resize',()=>{if(game&&!modalOpen)render();});
 $('rules').addEventListener('click',showRules);
 $('collection').addEventListener('click',showCollection);
 $('reset').addEventListener('click',showSetup);
