@@ -32,8 +32,8 @@ jobs:
       - name: Package static site
         run: |
           mkdir -p site
-          cp index.html game.js cards.js remote.js styles.css screen.css site/
-          if [ -d assets/cards ]; then mkdir -p site/assets && cp -r assets/cards site/assets/; fi
+          cp index.html game.js cards.js remote.js styles.css screen.css arena.css site/
+          if [ -d assets ]; then cp -r assets site/; fi
           touch site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
