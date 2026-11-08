@@ -28,6 +28,7 @@ jobs:
         run: |
           node tests/layout.browser.mjs
           node tests/play-field.browser.mjs
+          node tests/online.browser.mjs
       - name: Upload screenshots if a viewport fails
         if: always()
         uses: actions/upload-artifact@v4
