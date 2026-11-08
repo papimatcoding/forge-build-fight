@@ -5,7 +5,7 @@ export const CANVA_SERIES_I_URL = "https://www.canva.com/d/fEFpe7VMr09hhNH";
 export const CANVA_SERIES_I_DESIGN_ID = "DAHaVy260BU";
 export const RULES = {
   lanes:4,
-  startingHand:4,
+  startingHand:3,
   drawPerTurn:1,
   energyPerTurn:3,
   maxEnergy:10,
