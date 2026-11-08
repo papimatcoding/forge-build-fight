@@ -36,12 +36,12 @@ jobs:
           from pathlib import Path
           from PIL import Image
           p=list(Path("assets/cards").glob("*.png"))
-          assert len(p)==32, len(p)
+          assert len(p)==48, len(p)
           for f in p:
               im=Image.open(f)
               assert im.format=="PNG"
-              assert im.size in ((512,704),(256,352)),(str(f),im.size)
-          print("32 PNG images validated")
+              assert im.size in ((512,704),(512,512),(256,256)),(str(f),im.size)
+          print("48 PNG image variants validated")
           PY
       - name: Commit generated card art to feature branch
         run: |
