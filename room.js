@@ -26,6 +26,7 @@ export function isRemoteCommand(value,expectedSequence){
  const cmd=value.action;
  if(!cmd||typeof cmd!=="object")return false;
  if(cmd.type==="end")return true;
+ if(cmd.type==="draw")return ["unit","spell"].includes(cmd.deck);
  return cmd.type==="play"&&typeof cmd.uid==="string"&&cmd.uid.length>0&&cmd.uid.length<100&&
   (cmd.lane===null||Number.isInteger(cmd.lane)&&cmd.lane>=0&&cmd.lane<4);
 }
