@@ -7,7 +7,7 @@ let session=0,game=null,selected=null,logs=[],modalOpen=true,thinking=false;
 // UIDs already revealed on-screen. Newly visible cards animate exactly once.
 let revealedCards=[new Set(),new Set()];
 let peer=null,remotePending=false,lastSnapshot=0,version=0;
-let awaitingSeq=0,commandTimer=null;
+let awaitingSeq=0,commandTimer=null,helloTimer=null;
 const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const draw=()=>({uid:uid(),id:random(CARDS).id});
 const playerName=i=>'JUGADOR '+(i+1);
@@ -19,7 +19,7 @@ function toast(message){const el=$('toast');el.textContent=message;el.classList.
 function newGame(mode){
  if(peer&&mode!=='p2p-host'){peer.close();peer=null;}
  session++;selected=null;thinking=false;logs=[];modalOpen=false;remotePending=false;lastSnapshot=0;version=0;
- awaitingSeq=0;clearTimeout(commandTimer);commandTimer=null;
+ awaitingSeq=0;clearTimeout(commandTimer);commandTimer=null;clearTimeout(helloTimer);helloTimer=null;
  revealedCards=[new Set(),new Set()];
  game={mode,current:0,turns:0,score:0,finished:false,players:[0,1].map(()=>({energy:0,hand:Array.from({length:RULES.startingHand},draw),board:Array(RULES.lanes).fill(null),freeTurn:false,focusTargetId:null}))};
  lc('Empieza el duelo. La dignidad queda fuera del tablero.');
@@ -265,7 +265,15 @@ function showModal(title,kicker,text,buttons,extra=''){
  $('modal').classList.remove('hidden');
 }
 function closeModal(){modalOpen=false;$('modal').classList.add('hidden');}
+function stopHello(){clearTimeout(helloTimer);helloTimer=null;}
+function sendHelloUntilReady(){
+ if(!peer?.connected||peer.role!=='guest'||game?.mode==='p2p-guest'){stopHello();return;}
+ peer.send({type:'hello',protocol:1});
+ stopHello();
+ helloTimer=setTimeout(sendHelloUntilReady,900);
+}
 function showSetup(){
+ stopHello();
  if(peer){peer.close();peer=null;}clearPending();game=null;selected=null;
  showModal('NO HAY <em>MARCHA ATRÁS.</em>','BIENVENIDO A BARBARIDADES','Elige cómo jugar: con un amigo por internet, en el mismo dispositivo o contra la CPU.',[
   {label:'ONLINE · SALA CON CÓDIGO',action:'online',primary:true},
@@ -281,6 +289,7 @@ function showOnline(){
  ],'<p class="secondary">Usamos WebRTC con señalización pública. Algunas redes bloquean las conexiones directas sin servidor TURN.</p>');
 }
 function resetPeer(){
+ stopHello();
  if(peer){peer.close();peer=null;}
  clearPending();game=null;selected=null;lastSnapshot=0;version=0;
  revealedCards=[new Set(),new Set()];
@@ -330,12 +339,13 @@ function peerState(status){
     'Esperando a que se repartan las tres cartas iniciales…',[
     {label:'CANCELAR',action:'select-mode'}
    ]);
-   peer.send({type:'hello',protocol:1});
+   sendHelloUntilReady();
   }else{
    showModal('RIVAL <em>CONECTADO</em>','ONLINE · JUGADOR 1',
     'Preparando el tablero para los dos jugadores…',[
     {label:'CANCELAR',action:'select-mode'}
    ]);
+   peer.send({type:'ready',protocol:1}); // Host is listening before guest sends hello.
   }
   return;
  }
@@ -369,6 +379,7 @@ function sendGuestSnapshot(){
 }
 function remoteMessage(message){
  if(!message||typeof message!=='object'||!peer?.connected)return;
+ if(message.type==='ready'&&message.protocol===1&&peer.role==='guest'&&!game){sendHelloUntilReady();return;}
  if(message.type==='hello'&&message.protocol===1&&peer.role==='host'){
   if(!game||game.mode!=='p2p-host'){newGame('p2p-host');sendGuestSnapshot();}
   return;
@@ -380,7 +391,7 @@ function remoteMessage(message){
   if(next.players[0].hand.some(h=>h.id!==null||h.uid!==null))return;
   if(![0,1].includes(next.current)||!Number.isInteger(next.turns)||next.turns<0||
    next.players.some(p=>!Array.isArray(p.board)||p.board.length!==RULES.lanes))return;
-  lastSnapshot=message.version;game=next;logs=Array.isArray(next.log)?next.log.slice(0,9):[];
+  stopHello();lastSnapshot=message.version;game=next;logs=Array.isArray(next.log)?next.log.slice(0,9):[];
   selected=null;thinking=false;
   if(!awaitingSeq||(Number.isInteger(message.ackSeq)&&message.ackSeq>=awaitingSeq))clearPending();
   closeModal();render();
