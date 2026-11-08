@@ -399,7 +399,7 @@ function cardHtml(c,unit=null,variant='hand'){
  const artIcon=unit&&c.id==='perry'?(unit.hat?'🕵️':'🦦'):c.icon;
  return '<div class="card-piece '+c.type+' '+variant+(variant==='hand'&&!active?' inactive':'')+'" style="--art-hue:'+c.hue+'">'
    +'<div class="card-top"><span class="cost-bubble">⚡'+(variant==='hand'&&game?modifiedCost(c,game.current):c.cost)+'</span><span class="set-tag">SERIE I</span></div>'
-   +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+artIcon+'</span><span class="art-rays">✷</span></div>'
+   +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+artIcon+'</span><span class="art-rays">✷</span>'+(c.image?'<img class="card-art-image" src="'+c.image+'" alt="'+escapeHtml(c.alt)+'" loading="lazy" onerror="this.remove()">':'')+'</div>'
    +'<div class="card-name">'+c.name+'</div><div class="card-kind">'+c.kind+'</div>'
    +(variant==='board'?'':('<p class="card-description">'+c.text+'</p>'))
    +'<div class="card-bottom">'+stats+badges+'</div></div>';
