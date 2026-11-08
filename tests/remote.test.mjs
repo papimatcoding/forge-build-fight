@@ -26,5 +26,5 @@ test("P2P commands require strictly sequential ordered turns",()=>{
  assert.equal(isRemoteCommand({...good,action:{type:"play",uid:"abc123",lane:null}},1),true);
  assert.equal(isRemoteCommand({...good,action:{type:"play",uid:"abc123",lane:9}},1),false);
  assert.equal(isRemoteCommand({...good,seq:0},1),false);
- assert.equal(isRemoteCommand({...good,action:{type:"play",uid:"",lane:0}},1),true);
+ assert.equal(isRemoteCommand({...good,action:{type:"play",uid:"",lane:0}},1),false);
 });
