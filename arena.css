@@ -1,0 +1,226 @@
+/* BARBARIDADES 0.5 — Live in-game arena. Not a mockup.
+   This layer is loaded LAST to repair old legacy sizing conflicts. */
+
+html,body{height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none}
+.shell{height:100dvh;min-height:0;overflow:hidden;grid-template-rows:var(--header-h) minmax(0,1fr)}
+.shell > footer{display:none!important} /* Original HTML footer had no .footer class. */
+.layout,.main-panel,.board,.lanes,.lane,.hand-panel,.hand,.topbar,.left-panel{min-width:0;min-height:0}
+.layout{overflow:hidden;isolation:isolate}
+.main-panel{overflow:hidden;position:relative}
+.board{
+ position:relative;overflow:hidden;
+ background:#192b41 url("./assets/board/arena.svg") center / 100% 100% no-repeat;
+ border:1px solid #aa855e;box-shadow:inset 0 0 0 2px #0f2435,0 3px 10px #02081080;
+ border-radius:12px;
+}
+.board .player-strip{
+ background:linear-gradient(90deg,#263b53e8,#152b42e8);
+ border:1px solid #7893a77a;box-shadow:inset 0 1px #d1e9eb2b;
+}
+.board .player-strip.own{border-color:#b59b7480;background:linear-gradient(90deg,#2c4155ed,#19314ded)}
+.board .battle-marker{font-weight:900;letter-spacing:.11em;color:#ffd19b;text-shadow:0 1px 6px #c6845066}
+.board .zone-caption{color:#bdd8dfb8;letter-spacing:.095em}
+.board .lanes{align-items:stretch;justify-items:stretch;min-height:0;overflow:hidden}
+.board .lane{
+ min-height:0;height:100%;max-height:100%;aspect-ratio:auto;width:100%;box-sizing:border-box;
+ border:1px dashed #91b8d28f;background:linear-gradient(160deg,#203e57a0,#0e2338bd);
+ border-radius:6px;box-shadow:inset 0 0 12px #061729b5;
+ padding:2px;overflow:hidden;
+}
+.board .lane.empty{color:#82acc9}
+.board .lane.filled{
+ background:#16293d;border:1px solid #cba46d;
+ box-shadow:inset 0 0 0 1px #1d3549;
+}
+.board .lane.targetable{
+ outline:2px solid #ffd17d;outline-offset:-2px;
+ box-shadow:0 0 0 2px #ffcc7d55,inset 0 0 12px #fbd08533;
+}
+.board .card-piece{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:minmax(25px,auto) minmax(0,1fr) minmax(17px,auto)!important;
+ align-content:stretch;
+ gap:2px!important;
+ min-width:0!important;min-height:0!important;
+ width:100%!important;height:100%!important;max-width:none!important;
+ box-sizing:border-box;overflow:hidden;border:2px solid #e4ba6c;
+ padding:2px!important;border-radius:5px;
+ box-shadow:inset 0 0 0 1px #956c43;
+}
+.board .card-piece .card-top{
+ display:flex!important;align-items:center;justify-content:space-between;
+ min-height:0!important;height:auto!important;
+ max-height:44px;padding:2px 3px!important;overflow:hidden;
+}
+.board .card-heading{
+ font:900 clamp(9px,2.3vw,14px)/.94 "Barlow Condensed",sans-serif;
+ overflow:hidden;overflow-wrap:anywhere;min-width:0;display:-webkit-box;
+ -webkit-line-clamp:3;-webkit-box-orient:vertical;
+}
+.board .card-piece .cost-bubble{width:19px;min-width:19px;height:19px;font-size:10px}
+.board .card-piece .card-kind,.board .card-piece .card-description{display:none!important}
+.board .card-piece .card-art{
+ box-sizing:border-box!important;
+ display:block!important;position:relative;
+ min-height:0!important;height:100%!important;max-height:100%!important;
+ flex:none!important;overflow:hidden;border:1px solid #534453;
+ border-radius:3px;background:linear-gradient(145deg,#17253e,#354a60);
+}
+.board .card-piece .card-art-image{
+ display:block!important;
+ position:absolute;inset:0;
+ width:100%!important;height:100%!important;
+ object-fit:contain!important;
+ object-position:center center!important;
+ border-radius:2px;pointer-events:none;
+}
+.board .card-piece .card-icon{font-size:clamp(20px,5vw,37px)}
+.board .card-piece .card-bottom{
+ display:flex!important;align-items:center;justify-content:space-between;
+ gap:2px;min-height:0!important;height:auto!important;max-height:35px;
+ padding:1px 3px!important;
+}
+.board .card-piece .card-stats{display:flex;gap:2px;font-size:clamp(12px,3vw,16px);white-space:nowrap}
+.board .card-piece .status{font-size:9px}
+.board .empty-mark{gap:2px}
+.board .empty-mark b{font-size:clamp(22px,6vw,35px);font-weight:300;line-height:1.0}
+.board .empty-mark small{font-size:10px;color:#90b7cc}
+.hand-panel{
+ display:grid!important;grid-template-columns:minmax(0,1fr);
+ grid-template-rows:minmax(19px,auto) minmax(0,1fr) 38px!important;
+ gap:4px!important;
+ min-height:0;height:100%;overflow:hidden;
+ background:linear-gradient(180deg,#1a2a45,#101b31);
+ border-color:#655879;border-radius:10px;
+}
+.hand-heading{min-height:0;height:auto;margin:0;overflow:hidden}
+.hand-heading h2{line-height:1;font-size:clamp(16px,2.1vw,21px)}
+.hand-heading p{font-size:10px;line-height:1.15;max-width:56%;max-height:2.3em;overflow:hidden;color:#b1c8dc}
+.hand{
+ display:block!important;position:relative;
+ overflow:hidden!important;isolation:isolate;
+ width:100%;height:100%;min-height:0;
+ padding:0!important;margin:0!important;
+}
+.hand-card{
+ display:block!important;position:absolute!important;
+ left:var(--pos,0%)!important;bottom:0!important;top:0;
+ translate:var(--shift,0%) 0;
+ height:100%!important;min-height:0!important;max-height:100%!important;
+ flex:none!important;margin:0!important;overflow:hidden;
+ border:0;background:transparent;touch-action:manipulation;
+}
+.hand-card .card-piece{
+ display:grid!important;grid-template-columns:minmax(0,1fr);
+ grid-template-rows:minmax(22px,auto) minmax(0,1fr) 18px!important;
+ gap:2px!important;align-content:stretch;
+ padding:3px!important;
+ min-height:0!important;height:100%!important;max-height:100%!important;
+ box-shadow:0 3px 8px #010917b5;overflow:hidden;
+}
+.hand-card .card-piece .card-top{min-height:0!important;height:auto!important;max-height:43px;padding:2px 3px!important;overflow:hidden}
+.hand-card .card-heading{line-height:1;font-size:clamp(12px,3vw,15px)}
+.hand-card .card-piece .cost-bubble{width:20px;height:20px;min-width:20px;font-size:11px}
+.hand-card .card-piece .card-art{
+ display:block!important;position:relative;min-height:0!important;
+ height:100%!important;max-height:100%!important;
+ flex:none!important;overflow:hidden!important;border-width:1px
+}
+.hand-card .card-piece .card-art-image{
+ position:absolute;inset:0;width:100%!important;height:100%!important;
+ object-fit:contain!important;object-position:center;pointer-events:none
+}
+.hand-card .card-piece .card-kind,.hand-card .card-piece .card-description{display:none!important}
+.hand-card .card-piece .card-bottom{min-height:0!important;max-height:20px;padding:0 3px!important}
+.hand-card .card-stats{font-size:15px}
+.hand-card:hover,.hand-card:focus-visible{z-index:80}
+.hand-card.selected{z-index:81}
+.turn-actions{
+ position:relative!important;z-index:20!important;
+ min-height:0!important;height:38px!important;
+ display:flex;align-items:center;
+ padding:4px 0 0!important;margin:0!important;
+ border-top:1px solid #41516b;
+ background:linear-gradient(#142139,#111e32);
+}
+.turn-actions p{min-width:0;max-height:2em;overflow:hidden;font-size:10px;line-height:1.1}
+.turn-actions .primary{min-height:32px!important;height:32px!important;min-width:137px!important}
+.turn-actions #cancel:not([hidden]){min-height:32px!important}
+.topbar{width:100%!important;max-width:100%;overflow:hidden}
+.topbar .brand{min-width:0;flex-shrink:1}
+.topbar .top-actions{flex:0 0 auto}
+@media(max-width:850px){
+ .shell{padding:0 5px}
+ .layout{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:30px minmax(0,1fr)!important;padding:3px 0 4px;gap:3px}
+ .left-panel{grid-row:1;grid-column:1;min-height:0;height:30px!important;display:block}
+ .left-panel .panel:first-child{height:30px!important}
+ .main-panel{
+  grid-row:2;grid-column:1;min-height:0;
+  grid-template-rows:minmax(23px,auto) minmax(0,1fr) clamp(165px,29dvh,226px)!important;gap:3px
+ }
+ .arena-heading{min-height:0!important;height:auto}
+ .arena-heading h1{font-size:clamp(19px,5.7vw,27px)}
+ .board{
+  padding:5px 6px!important;
+  grid-template-rows: minmax(27px,auto) 11px minmax(0,1fr) 13px minmax(0,1fr) 11px minmax(27px,auto)!important;
+  gap:2px
+ }
+ .board .player-strip{min-height:0;padding:2px 4px}
+ .board .lanes{gap:4px}
+ .board .lane{padding:2px}
+ .board .card-piece{grid-template-rows:minmax(24px,auto) minmax(0,1fr) 19px!important}
+ .board .card-piece .card-top{max-height:38px}
+ .board .card-heading{font-size:clamp(10px,2.6vw,13px)}
+ .board .card-piece .card-bottom{max-height:21px}
+ .board .card-piece .card-stats{font-size:13px}
+ .hand-panel{grid-template-rows:20px minmax(0,1fr) 38px!important;padding:5px!important}
+ .hand-heading p{font-size:9px;max-width:55%}
+ .turn-actions{height:38px!important}
+ .turn-actions .btn{font-size:14px}
+}
+@media(max-width:380px){
+ .board{padding:3px 4px!important}
+ .board .lanes{gap:3px}
+ .board .lane{border-radius:4px;padding:1px}
+ .board .card-piece{border-width:1px;padding:1px!important}
+ .board .card-heading{font-size:9px}
+ .board .card-piece .card-top{padding:1px 2px!important;max-height:35px}
+ .board .card-piece .card-art{border-width:1px}
+ .board .card-piece .card-bottom{padding:0 2px!important}
+ .hand-card .card-heading{font-size:12px}
+ .turn-actions .primary{min-width:123px!important;padding:4px 8px!important}
+}
+@media(max-height:590px) and (orientation:portrait){
+ .main-panel{grid-template-rows:minmax(20px,auto) minmax(0,1fr) 162px!important}
+ .board{grid-template-rows:23px 8px minmax(0,1fr) 10px minmax(0,1fr) 8px 23px!important}
+ .board .card-piece{grid-template-rows:minmax(20px,auto) minmax(0,1fr) 16px!important}
+ .board .card-piece .card-top{max-height:28px}
+ .board .card-heading{font-size:9px}
+ .board .card-piece .card-stats{font-size:12px}
+}
+@media(max-height:530px) and (orientation:landscape){
+ .layout{grid-template-columns:128px minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important}
+ .left-panel{grid-column:1;grid-row:1;height:100%!important}
+ .left-panel .panel:first-child{height:auto!important;min-height:72px}
+ .main-panel{grid-column:2;grid-row:1;grid-template-rows:20px minmax(0,1fr) clamp(115px,35dvh,144px)!important}
+ .board{grid-template-rows:20px 7px minmax(0,1fr) 9px minmax(0,1fr) 7px 20px!important;padding:2px 3px!important}
+ .board .card-piece{grid-template-rows:minmax(15px,auto) minmax(0,1fr) 15px!important}
+ .board .card-piece .card-top{max-height:22px}
+ .board .card-heading{font-size:8px}
+ .board .card-piece .cost-bubble{width:15px;min-width:15px;height:15px;font-size:8px}
+ .board .card-piece .card-stats{font-size:10px}
+ .hand-panel{grid-template-rows:16px minmax(0,1fr) 32px!important;gap:2px!important}
+ .hand-heading h2{font-size:15px}
+ .hand-heading p,.turn-actions p{display:none}
+ .turn-actions{height:32px!important}
+ .turn-actions .primary{height:29px!important;min-height:29px!important}
+ .hand-card .card-piece{grid-template-rows:19px minmax(0,1fr) 15px!important}
+ .hand-card .card-heading{font-size:10px}
+ .hand-card .card-stats{font-size:12px}
+}
+/* Keep scrolling only in explicit modal dialogs (rules, collection, P2P). */
+.overlay .modal{max-height:calc(100dvh - 24px);overflow:auto}
+@media(prefers-reduced-motion:reduce){
+ .hand-card.is-dealt{animation:none!important}
+}
