@@ -1,0 +1,54 @@
+name: Import Canva Serie I preview PNGs (one-time)
+on:
+  push:
+    branches:
+      - feature/serie-i-real-art-p2p
+    paths:
+      - scripts/canva_preview_sources.json
+      - scripts/import_canva_previews.py
+      - .github/workflows/import-canva.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: serie-i-canva-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install image processing
+        run: python -m pip install --disable-pip-version-check Pillow==11.1.0
+      - name: Download Canva art and produce PNGs
+        run: python scripts/import_canva_previews.py
+      - name: Verify PNG signatures and dimensions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          p=list(Path("assets/cards").glob("*.png"))
+          assert len(p)==32, len(p)
+          for f in p:
+              im=Image.open(f)
+              assert im.format=="PNG"
+              assert im.size in ((512,704),(256,352)),(str(f),im.size)
+          print("32 PNG images validated")
+          PY
+      - name: Commit generated card art to feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/cards
+          if ! git diff --cached --quiet; then
+            git commit -m "assets: import 16 Canva cards as permanent PNG files [assets-sync]"
+            git push origin HEAD:feature/serie-i-real-art-p2p
+          fi
