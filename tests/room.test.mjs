@@ -96,7 +96,7 @@ test("room rejects duplicate room ID and unknown room",async()=>{
  try{
   host.host("TEST45");
   duplicate.host("TEST45");
-  missing.join("NOT456");
+  missing.join("NXT456");
   await flush();
   assert.ok(events.includes("code-in-use"));
   assert.ok(missingEvents.includes("room-not-found"));
