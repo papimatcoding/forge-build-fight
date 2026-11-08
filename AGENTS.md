@@ -156,3 +156,15 @@ Formato obligatorio para nuevas entradas: **fecha — tema — fuentes verificab
 - Validación requerida: `npm run check`, `npm test`, `CI` y, de ser posible, pruebas de navegador con viewports representativos (320×568, 390×844, 844×390, 1366×768). **Los tests de Node no demuestran por sí solos que una interfaz quepa visualmente**.
 - Registrar en cada parche si el nuevo CSS se ha incluido correctamente en `.github/workflows/pages.yml`; si no se publica `screen.css`, el resultado no se verá en Pages.
 - No restaurar un HUD antiguo con columnas extra que fuerce scroll. Futuros gráficos y animaciones deben respetar presupuesto de viewport.
+
+
+## 11. Parche 0.5 — el tablero debe ser jugable tras colocar cartas (08/11/2026)
+
+- **Incidencia reproducida visualmente por el usuario:** screenshot Android 345 px aprox.: tras jugar una criatura, el retrato de la carta se mostraba como una tira horizontal, con el resto del cuerpo vacío; la mano quedaba cortada y el botón «Acabar turno» se superponía a las cartas. El pie de página aparecía aun estando oculto por una regla `.footer` porque el HTML empleaba una etiqueta `<footer>` sin esa clase.
+- **Solución de código, NO mockup:** `arena.css` cargado al final, corrige específicamente la maquetación con `display:grid` real para las cartas de campo y mano, y distribuye *cabecera / ilustración / estadísticas* en filas que reservan el espacio disponible. Se usa `object-fit: contain` para mostrar las 16 imágenes recortadas de Canva sin cortarlas.
+- Se crea **un activo real de tablero**, `assets/board/arena.svg`, fondo decorativo azul oscuro con madera y marcos dorados; se asigna mediante CSS a `.board` y queda debajo de los carriles interactivos. **No es una captura estática con botones falsos.** El tablero y todos sus carriles, botones y cartas siguen siendo DOM y permiten interacción.
+- `.shell > footer{display:none}` evita el pie de página que ocupaba espacio en el móvil; la mano conserva altura y el botón de finalizar tiene su propia fila invariable, sin quedar tapado por cartas.
+- `.github/workflows/pages.yml` debe publicar **`arena.css` y `assets/board/arena.svg`** además de cartas y JS; de lo contrario el parche no estará desplegado aunque main tenga los cambios.
+- **Regresión de navegador** `tests/play-field.browser.mjs`: abre 5 viewports, fuerza una mano con Abuela (coste 3), coloca una carta en el campo, comprueba PNG cargado y `object-fit: contain`, altura real del arte, visibilidad y clic del botón «Acabar turno», tres cartas iniciales, ausencia de scroll y que el SVG de fondo se sirva correctamente. `tests/layout.browser.mjs` sigue comprobando turnos y tamaños.
+- **Pruebas críticas:** NO considerar «arreglado» si solo pasan pruebas de mano vacía. Ejecutar una partida real, jugar una criatura y comprobar su ilustración y el botón en un móvil estrecho. Guardar capturas de navegador de CI al depurar.
+- **Limitación:** el fondo SVG es deliberadamente genérico para no reemplazar los memes ni introducir reglas ficticias; los PNG y estadísticas de las cartas siguen definidos exclusivamente por `cards.js` y `game.js`.
