@@ -1,4 +1,4 @@
-# BARBARIDADES — Serie I · 0.3
+# BARBARIDADES — Serie I · 0.4
 
 Juego web de estrategia por turnos con 16 cartas absurdas, cuatro carriles y victoria por balanza. Sustituye definitivamente el viejo prototipo **Forge Build Fight**.
 
@@ -10,12 +10,16 @@ Juego web de estrategia por turnos con 16 cartas absurdas, cuatro carriles y vic
 ## Reglas
 
 - Los jugadores comparten una arena con **4 carriles enfrentados**.
-- Al comienzo de cada turno propio: **+3 energía** y **+1 carta aleatoria** (también salen repetidas). La energía se acumula hasta 10. La mano inicial son 4 cartas, más el robo del primer turno.
+- Cada jugador comienza con **3 cartas iniciales**, sin robo adicional durante los dos turnos globales de preparación. En los turnos posteriores roba **1 carta aleatoria** (también salen repetidas). Recibe **+3 energía al comienzo de cada turno propio**, acumulable hasta 10.
 - Juegas cuantas cartas y efectos quieras pagando la energía.
 - Los **dos primeros turnos globales** no tienen fase de ataque.
 - Desde el tercer turno, al pulsar *Acabar turno*, **solo atacan las criaturas del jugador activo**, de carril a carril. Si no hay carta rival enfrente, anota directamente en la balanza.
 - Gana quien alcanza una ventaja de **5 puntos**.
 - Las criaturas defensoras no contraatacan al ser golpeadas salvo habilidades específicas, como las paletas de Pereira.
+
+## Interfaz sin scroll y animación de cartas (0.4)
+
+La partida completa se adapta a la altura del navegador con CSS `100dvh`: cuatro carriles enfrentados, marcador, energía, mano y botón de acabar turno son visibles sin desplazamiento vertical de la página. En móvil funciona tanto en orientación vertical como horizontal (en pantallas extremadamente pequeñas, los dibujos y textos se compactan). Las cartas en mano se solapan en abanico si es necesario; puedes tocarlas para ver su efecto completo en una burbuja sin abandonar el tablero. Los hechizos sin objetivo se seleccionan primero y se confirman con **JUGAR EFECTO** para evitar lanzamientos involuntarios. El reparto inicial de las **3 cartas** y cada robo posterior tiene animación escalonada (desactivada automáticamente para quienes solicitan movimiento reducido). Los modales de configuración, colección y códigos P2P pueden desplazarse por separado.
 
 ## Modos
 
