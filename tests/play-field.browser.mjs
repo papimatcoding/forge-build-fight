@@ -63,6 +63,7 @@ for(const size of sizes){
     handArtImgLoaded:[...document.querySelectorAll(".hand-card .card-art-image")].every(el=>el.complete&&el.naturalWidth>0)
    };
   });
+  console.log("GEOMETRY "+size.name+" "+JSON.stringify({viewport:[measure.vw,measure.vh],board:measure.rects[".board"],lane:measure.rects[".board .lane.filled"],card:measure.rects[".board .lane.filled .card-piece"],art:measure.rects[".board .lane.filled .card-art"],hand:measure.rects["#hand"],handArt:measure.rects[".hand-card .card-art"],button:measure.rects["#end-turn"],endHit:measure.endHit}));
   assert.equal(measure.footerHidden,true,size.name+": old footer must be hidden");
   assert.equal(measure.imgLoaded,true,size.name+": field card must display actual PNG");
   assert.equal(measure.handArtImgLoaded,true,size.name+": hand card PNGs must load");
