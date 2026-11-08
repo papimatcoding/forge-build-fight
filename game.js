@@ -39,7 +39,7 @@ function enterTurn(){
  for(let i=0;i<RULES.lanes;i++){
   const u=p.board[i];
   if(!u)continue;
-  if(u.id==='raul')p.energy=clamp(p.energy+1,0,RULES.maxEnergy);
+  if(u.id==='raul'){p.energy=clamp(p.energy+1,0,RULES.maxEnergy);announceAbility('🎓 BECA MEC','Raúl concede +1 de energía','energy');}
   if(u.id==='perry'){
    const lost=u.maxHealth-u.health;
    u.hat=!u.hat;
@@ -47,7 +47,7 @@ function enterTurn(){
    u.maxHealth=u.hat?3:2;
    u.health=Math.max(1,u.maxHealth-lost);
    u.shield=u.hat?1:0;
-   lc('Perry se '+(u.hat?'pone el gorro de agente (2/3 y protección).':'quita el gorro (4/2 y sin protección).'));
+   announceAbility('🕵️ PERRY CAMBIA DE FORMA',u.hat?'Con gorro 2/3 y escudo':'Sin gorro 4/2','transform');
    if(u.health<=0)damage(game.current,i,999,'crisis de identidad');
   }
  }
@@ -247,48 +247,81 @@ function giveCheese(p,lane){
  }
  if(served)announceAbility('🧀 QUESOS','La vaca cura a '+served+' vecinos','heal');
 }
+function effectivePower(player,lane,u){
+ const p=game.players[player],enemy=game.players[1-player];
+ const neighbor=[lane-1,lane+1].some(i=>i>=0&&i<RULES.lanes&&p.board[i]);
+ let power=u.attack;
+ if(u.id==='agustin51'&&neighbor){power++;announceAbility('🌭 SALCHICHÓN','Agustín51 ataca con +1 daño','attack');}
+ if(u.id==='perrosanchez'&&neighbor){power++;announceAbility('🐕 COALICIÓN','+1 ataque por vecino aliado','attack');}
+ if(enemy.board[lane]?.id==='kirk'){power--;announceAbility('🎙️ DEBATE','Charlie Kirk reduce el ataque de enfrente','debuff');}
+ if(u.hex>0){
+  power-=2;u.hex--;
+  announceAbility('🔮 MALA SUERTE','-2 ataque; quedan '+u.hex+' turnos','debuff');
+ }
+ return Math.max(0,power);
+}
+function extraAttacks(player,lane,u){
+ const p=game.players[player],foe=game.players[1-player];
+ if(u.id==='trancas'){
+  let hit=0;
+  for(const n of [lane-1,lane+1])if(n>=0&&n<RULES.lanes&&foe.board[n]){
+   damage(1-player,n,1,'Trancas y Barrancas');hit++;
+  }
+  if(hit)announceAbility('🐜 TRANCAS Y BARRANCAS','Golpean a '+hit+' vecinos','attack');
+ }
+ if(u.id==='tralalero'&&lane<RULES.lanes-1&&foe.board[lane+1]){
+  damage(1-player,lane+1,1,'zapatillas supersónicas');
+  announceAbility('🦈 TRALALERO TRALALA','Zapatillazo al carril de la derecha','attack');
+ }
+ if(u.id==='cow')giveCheese(p,lane);
+ if(u.id==='capybara'&&p.board[lane]===u){
+  const healed=Math.min(u.maxHealth-u.health,1);
+  u.health=Math.min(u.maxHealth,u.health+1);
+  if(healed)announceAbility('🦫 PAZ ABSOLUTA','Capibara recupera 1 vida','heal');
+ }
+}
 function attackStep(player){
  lc('⚔ Atacan ÚNICAMENTE las cartas de '+playerName(player)+'.');
  const p=game.players[player],foe=game.players[1-player];
  const focus=p.focusTargetId,focusedLane=focus?foe.board.findIndex(u=>u?.uid===focus):-1;
  p.focusTargetId=null;
  if(focus&&focusedLane>=0){
-  const target=foe.board[focusedLane];
-  let volley=0,attackers=0;
+  const target=foe.board[focusedLane];let volley=0,attackers=0;
   for(let lane=0;lane<RULES.lanes;lane++){
-   const u=p.board[lane];
-   if(!u||u.attack<=0)continue;
-   if(u.stun>0){u.stun--;lc(card(u.id).name+' está aturdido y no dispara.');continue;}
-   volley+=u.id==='duck'?3:u.attack;
-   if(u.id==='grandma'&&u.slipper){volley+=2;u.slipper=false;}
-   if(u.id==='cow')giveCheese(p,lane);
-   attackers++;
+   const u=p.board[lane];if(!u)continue;
+   if(u.stun>0){u.stun--;announceAbility('💫 ATURDIDO',card(u.id).name+' pierde su ataque','debuff');continue;}
+   const power=effectivePower(player,lane,u);if(power<=0)continue;
+   volley+=power;
+   if(u.id==='grandma'&&u.slipper){volley+=2;u.slipper=false;announceAbility('🩴 CHANCLAZO','+2 de daño de la abuela','attack');}
+   attackers++;extraAttacks(player,lane,u);
   }
-  lc('🎯 HIPERGAMIA: '+attackers+' criaturas concentran '+volley+' de daño en '+card(target.id).name+'.');
-  if(volley>0)damage(1-player,focusedLane,volley,'ataque concentrado');
+  announceAbility('💍 HIPERGAMIA',attackers+' criaturas concentran '+volley+' daño en '+card(target.id).name,'attack');
+  if(volley>0&&foe.board[focusedLane])damage(1-player,focusedLane,volley,'ataque concentrado');
   return;
  }
- if(focus)lc('El objetivo de Hipergamia desapareció antes del ataque; se ataca normalmente.');
+ if(focus)lc('El objetivo de Hipergamia desapareció; se ataca normalmente.');
  for(let lane=0;lane<RULES.lanes;lane++){
   if(game.finished)break;
   const u=p.board[lane];if(!u)continue;
-  if(u.stun>0){u.stun--;lc(card(u.id).name+' pierde el ataque por aturdimiento.');continue;}
-  if(u.attack<=0)continue;
-  const hits=u.id==='duck'?[1,1,1]:[u.attack];
-  for(let hit of hits){
-   if(game.finished||!p.board[lane]||p.board[lane].uid!==u.uid)break;
-   const t=foe.board[lane];
-   if(t){
-    let d=hit;
-    if(u.id==='grandma'&&u.slipper){d+=2;u.slipper=false;lc('¡CHANCLAZO SUPREMO!');}
-    damage(1-player,lane,d,card(u.id).name);
+  if(u.stun>0){u.stun--;announceAbility('💫 ATURDIDO',card(u.id).name+' pierde su ataque','debuff');continue;}
+  const power=effectivePower(player,lane,u);
+  if(power<=0)continue;
+  const hits=u.id==='duck'?Array.from({length:power},()=>1):[power];
+  for(const hit of hits){
+   if(game.finished||p.board[lane]!==u)break;
+   if(foe.board[lane]){
+    let damageAmount=hit;
+    if(u.id==='grandma'&&u.slipper){
+     damageAmount+=2;u.slipper=false;
+     announceAbility('🩴 CHANCLAZO','+2 daño de la abuela','attack');
+    }
+    damage(1-player,lane,damageAmount,card(u.id).name);
    }else scoreDirect(player,hit,card(u.id).name);
   }
-  if(game.finished||!p.board[lane]||p.board[lane].uid!==u.uid)continue;
-  if(u.id==='trancas')for(const neighbor of [lane-1,lane+1])if(neighbor>=0&&neighbor<RULES.lanes&&foe.board[neighbor])damage(1-player,neighbor,1,'ataque en pareja');
-  if(u.id==='cow')giveCheese(p,lane);
+  if(!game.finished&&p.board[lane]===u)extraAttacks(player,lane,u);
  }
 }
+
 function applyDiseases(player){
  const p=game.players[player];
  for(let i=0;i<RULES.lanes;i++){
