@@ -278,7 +278,7 @@ function sendGuestSnapshot(){
 }
 function remoteMessage(message){
  if(!message||typeof message!=='object')return;
- if(message.type==='snapshot'&&message.state?.mode==='p2p-guest'&&peer){
+ if(message.type==='snapshot'&&message.state?.mode==='p2p-guest'&&peer&&game?.mode!=='p2p-host'){
   if(!Number.isSafeInteger(message.version)||message.version<=lastSnapshot)return;
   const next=message.state;
   if(!Array.isArray(next.players)||next.players.length!==2||!Array.isArray(next.players[0].hand)||!Array.isArray(next.players[1].hand))return;
