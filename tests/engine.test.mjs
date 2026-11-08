@@ -15,7 +15,7 @@ function harness(){
  const script=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8")
   .replace(/^import[^\n]*\n/gm,"");
  const globals="const {CARDS,CARDS_BY_ID,RULES,BLOCK,CANVA_SERIES_I_URL}=globalThis.__cards;";
- const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
+ const expose=';globalThis.testApi={newGame,card,unitOf,playCard,endTurn,enterTurn,attackStep,applyDiseases,modifiedCost,closeModal,getGame:()=>game,logs:()=>logs,safeGuestSnapshot,render,getHandMarkup:()=>document.getElementById("hand").innerHTML,place:(p,id,l)=>{game.players[p].board[l]=unitOf(card(id));return game.players[p].board[l];},give:(p,id)=>{const h={uid:uid(),id};game.players[p].hand.push(h);return h.uid;},energy:(p,v)=>{game.players[p].energy=v;},current:(p)=>{game.current=p;},turns:(v)=>{game.turns=v;}};';
  vm.runInContext(globals+script+expose,context);
  const api=context.testApi;api.newGame("local");return api;
 }
@@ -104,4 +104,29 @@ test("P2P host transmits only the guest hand, never its own hidden cards",()=>{
  assert.ok(view.players[1].hand.every(h=>typeof h.id==="string"&&typeof h.uid==="string"));
  assert.equal(view.players[0].board.length,4);
  assert.equal(view.players[1].board.length,4);
+});
+
+test("Exactly 3 opening cards per player; first normal draw happens on turn 3",()=>{
+ const t=harness(),g=t.getGame();
+ assert.equal(g.players[0].hand.length,3);
+ assert.equal(g.players[1].hand.length,3);
+ assert.equal(g.players[0].energy,3);
+ t.endTurn();assert.equal(g.players[1].hand.length,3);
+ t.closeModal();t.endTurn();
+ assert.equal(g.players[0].hand.length,4);
+ assert.equal(g.players[1].hand.length,3);
+ t.closeModal();t.endTurn();
+ assert.equal(g.players[1].hand.length,4);
+});
+
+test("Dealing animation marks only newly revealed cards",()=>{
+ const t=harness();
+ const first=t.getHandMarkup();
+ assert.equal((first.match(/class="hand-card dealing/g)||[]).length,3);
+ t.render();
+ const same=t.getHandMarkup();
+ assert.equal((same.match(/class="hand-card dealing/g)||[]).length,0);
+ t.endTurn();t.closeModal();t.render();
+ const second=t.getHandMarkup();
+ assert.equal((second.match(/class="hand-card dealing/g)||[]).length,3);
 });
