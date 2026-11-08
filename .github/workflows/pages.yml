@@ -1,4 +1,4 @@
-name: Publish Forge Build Fight to GitHub Pages
+name: Deploy Barbaridades to GitHub Pages
 
 on:
   push:
@@ -16,35 +16,27 @@ concurrency:
 
 jobs:
   deploy:
-    name: Validate and deploy static prototype
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Validate JavaScript
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source syntax and gameplay mechanics
         run: |
-          node --check app.js
-          test -s index.html
-          test -s styles.css
-
-      - name: Assemble Pages site
+          npm run check
+          npm test
+      - name: Package static site
         run: |
           mkdir -p site
-          cp index.html styles.css app.js site/
+          cp index.html game.js cards.js styles.css site/
           touch site/.nojekyll
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: site
-
-      - name: Deploy site
+      - uses: actions/deploy-pages@v4
         id: deployment
-        uses: actions/deploy-pages@v4

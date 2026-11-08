@@ -1,37 +1,66 @@
-# Forge Build Fight
+# Barbaridades — Serie I (0.2)
 
-**Prototipo 0.1** — Un Tower Defense modular de navegador donde cada torre nace de piezas forjadas al azar.
+**Un juego de cartas absurdas con decisiones estratégicas.** Este proyecto sustituye el prototipo Tower Defense anterior en el repositorio `forge-build-fight`.
 
 ## Jugar
 
-Abre `index.html` en un navegador moderno o visita GitHub Pages una vez publicado. No hay dependencias, build ni cuentas. La partida se guarda en `localStorage`.
+Prueba el prototipo en GitHub Pages: https://papimatcoding.github.io/forge-build-fight/
 
-## Bucle principal
+Para jugar en local, abre `index.html` desde un servidor estático (`python -m http.server 8000`, por ejemplo). No necesitas instalar dependencias. El motor no requiere conexión a internet; el enlace de Canva y las fuentes web sí.
 
-1. **Forge:** gasta tiradas para conseguir piezas comunes, raras, épicas, legendarias y míticas. Mejora la forja con oro para aumentar gradualmente las probabilidades superiores.
-2. **Build:** escoge **una** pieza por ranura: chasis, arma, mecanismo y núcleo. Ensambla una torreta. Las piezas físicas se consumen y se recuperan al desmontar fuera del combate. Una rareza superior mejora las estadísticas, pero las sinergias importan.
-3. **Fight:** coloca las torretas ensambladas en pedestales alrededor del camino. Defiende el núcleo en **cinco niveles** de campaña, con enemigos veloces, blindados y un jefe final. Gana oro, tiradas y desbloquea niveles.
+### Modos disponibles
 
-## Contenido de la primera versión
+- **1v1 local en un mismo dispositivo**: al terminar un turno aparece una pantalla para pasar el dispositivo. Cada jugador solo ve su mano al pulsar continuar.
+- **Vs CPU**: bot sencillo para comprobar las reglas. No es multijugador online ni IA avanzada.
 
-- 12 modelos de piezas (3 por ranura), 5 rarezas, hasta 8 niveles de forja.
-- Torreta modular con estadísticas de daño, cadencia, alcance y núcleo con efectos de quemadura, congelación y cadena.
-- 10 posiciones de torreta, cinco niveles y jefe en el quinto.
-- Animación sobre Canvas 2D, interfaz adaptable a móvil y escritorio.
-- Partida local guardada al forjar, mejorar, ensamblar y ganar niveles.
+**IMPORTANTE:** GitHub Pages solo sirve archivos estáticos. Todavía no existe modo multijugador remoto ni matchmaking.
 
-**Nota:** la versión anterior del repositorio era el juego `Snake Busters`. Su contenido fue sustituido por completo. Queda recuperable en el historial Git anterior al commit de reinicio.
+## Reglas del primer prototipo
 
-## Desarrollo
+- Cuatro carriles para cada jugador. Las criaturas atacan la carta rival enfrentada; si el carril está libre, inclinan la balanza.
+- Cada jugador recibe **3 de energía al comienzo de su propio turno**; puede guardar hasta un máximo de 10.
+- Se roba una carta completamente aleatoria por turno, con duplicados y un máximo de 9 cartas en la mano. La mano inicial es de 4 más el robo del turno inicial.
+- Cada jugador puede jugar tantas cartas como quiera mientras tenga energía, y acaba su turno cuando lo decida.
+- Los dos primeros turnos globales son preparación, **sin ataques**.
+- A partir del tercer turno global, **solo atacan las criaturas del jugador que acaba de terminar su propio turno**.
+- Gana quien consiga una diferencia de **5 puntos en la balanza**.
+- Las criaturas no contraatacan al recibir ataques, salvo habilidades explícitas.
 
-Sirve estos archivos con cualquier servidor estático, por ejemplo:
+## Catálogo: Serie I (16 cartas)
+
+`cards.js` define los 16 naipes, con coste, estadísticas, efectos y referencias de página a Canva. El motor y UI están en `game.js`, `index.html` y `styles.css`.
+
+### Cambios especiales confirmados
+
+- **Beca MEC**: +1 energía al comenzar cada turno propio mientras esté en el campo.
+- **Pereira Castor**: al morir, contraataca con sus paletas.
+- **Hipergamia**: selecciona una criatura enemiga para concentrar contra ella el siguiente ataque de todas las criaturas aliadas (el efecto se consume en ese ataque, incluso si se jugó durante preparación).
+- **Token pirata de Fortnite**: las cartas restantes cuestan cero durante ese turno, incluso con Inspector Hacienda.
+- **Perry el ornitorrinco**: con gorro 2/3 y escudo para un efecto hostil; sin gorro 4/2; alterna al empezar cada turno **de su dueño**.
+- **La vaca que ríe**: tras atacar entrega quesos a criaturas aliadas adyacentes y les recupera un punto de vida.
+
+## Arte en Canva
+
+**Álbum editable de la Serie I:** https://www.canva.com/d/1nGX-UD4kuLDJGu
+
+**Carpeta de Canva:** https://www.canva.com/folder/FAHaVurOQPc
+
+Las cartas siguen el mismo orden que `CARDS` y `canvaPage` marca su página 1–16. La interfaz usa **iconos provisionales y tarjetas hechas con CSS**; no se incluyen miniaturas temporales con enlaces firmados porque caducan. Antes de la versión final habrá que exportar las ilustraciones a archivos permanentes y sustituir esos placeholders.
+
+## Tests
 
 ```bash
-python -m http.server 8000
+npm test
+npm run check
 ```
 
-Abre `http://localhost:8000`. Para publicar con GitHub Pages: Settings → Pages → Deploy from a branch → `main` / `/ (root)`.
+El test suite comprueba reglas de turno, catálogo, Hipergamia, Token pirata, Beca MEC, Perry, Pereira, quesos y Cáncer/Quimio. Los tests no sustituyen las pruebas visuales y multijugador.
 
-## Próximos pasos
+## Roadmap
 
-Balancear dificultad y probabilidades tras pruebas, mejorar feedback de forja y del combate, hacer que los núcleos transformen visiblemente los disparos, incorporar enemigos con habilidades, pulir arte 3D para la migración a motor si el prototipo demuestra ser divertido.
+1. Probar partidas completas, revisar balance y corregir bugs.
+2. Exportar artes individuales permanentes desde Canva y conectarlos a las cartas.
+3. Ampliar la colección y crear audio, animaciones y sinergias absurdas.
+4. Implementar multijugador online con servidor autoritativo y salas privadas.
+
+**Advertencia de propiedad intelectual:** hay nombres y referencias a personajes de terceros. Antes de distribuir comercialmente el juego convendría revisar licencias y sustituir diseños protegidos si procede.
