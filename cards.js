@@ -1,8 +1,8 @@
 // Serie I · Archivo de diseño fuente: Canva (URL y páginas enlazadas abajo).
 // No se incrustan miniaturas de Canva porque sus URLs temporales caducan.
 // El código referencia el diseño permanente y cada carta guarda su número de página.
-export const CANVA_SERIES_I_URL = "https://www.canva.com/d/1nGX-UD4kuLDJGu";
-export const CANVA_SERIES_I_DESIGN_ID = "DAHaVoHzuyY";
+export const CANVA_SERIES_I_URL = "https://www.canva.com/d/fEFpe7VMr09hhNH";
+export const CANVA_SERIES_I_DESIGN_ID = "DAHaVy260BU";
 export const RULES = {
   lanes:4,
   startingHand:4,
@@ -23,13 +23,18 @@ export const CARDS=[
   {id:"chemo",name:"Quimio",type:"spell",cost:2,kind:"remedio",icon:"💉",hue:182,effect:"chemo",target:"friendCancer",text:"Elimina Cáncer de una criatura aliada. Le causa 1 de daño."},
   {id:"taxoffice",name:"Agencia Tributaria",type:"spell",cost:4,kind:"pesadilla",icon:"🏦",hue:11,effect:"taxoffice",text:"Confisca hasta 2 de energía rival y te entrega 1 de energía."},
   {id:"inspector",name:"Inspector Hacienda",type:"unit",cost:3,attack:1,health:5,kind:"funcionario",icon:"🕵️",hue:10,effect:"inspector",text:"Mientras viva, jugar cartas de coste 4 o más cuesta +1 al rival."},
-  {id:"raul",name:"Beca MEC",type:"unit",cost:2,attack:1,health:3,kind:"subvención",icon:"🎓",hue:197,effect:"grant",text:"Al comienzo de tus turnos, obtienes +1 de energía."},
+  {id:"raul",name:"Raúl Becas y Ayudas",abilityName:"Beca MEC",type:"unit",cost:2,attack:1,health:3,kind:"subvención",icon:"🎓",hue:197,effect:"grant",text:"Beca MEC — Al comienzo de tus turnos, obtienes +1 de energía."},
   {id:"sixseven",name:"Sixseven",type:"spell",cost:6,kind:"brainrot",icon:"6️⃣",hue:270,effect:"sixseven",text:"Lanza el destino: 6 de daño a una criatura aleatoria enemiga o +7 de energía."},
   {id:"piratetoken",name:"Token pirata de Fortnite",type:"spell",cost:3,kind:"botín",icon:"🪙",hue:43,effect:"pirate",text:"Durante el resto de tu turno, TODAS tus cartas cuestan 0 de energía."},
   {id:"perry",name:"Perry el ornitorrinco",type:"unit",cost:4,attack:2,health:3,kind:"agente secreto",icon:"🕵️",hue:172,effect:"agent",text:"Con gorro: 2/3 y bloquea un efecto enemigo. Sin gorro: 4/2. Cambia de forma cada turno propio."},
   {id:"hyper",name:"Hipergamia",type:"spell",cost:3,kind:"táctica",icon:"💍",hue:318,effect:"hyper",target:"enemy",text:"Elige una carta enemiga: todas tus criaturas concentrarán en ella su próximo ataque."},
   {id:"steve",name:"Steve (Minecraft)",type:"unit",cost:4,attack:3,health:5,kind:"constructor",icon:"⛏️",hue:145,effect:"block",text:"Al entrar, crea un Bloque de tierra 0/3 en un carril aliado libre."},
   {id:"cow",name:"La vaca que ríe",type:"unit",cost:3,attack:1,health:5,kind:"lácteo",icon:"🐄",hue:355,effect:"heal",text:"Tras atacar, reparte quesos 🧀: cada aliado vecino recupera 1 de vida."}
-].map((card,index)=>({...card,series:"I",canvaPage:index+1}));
+].map((card,index)=>({
+ ...card,series:"I",canvaPage:index+1,
+ // Illustrations imported from the Canva portrait edition; HTML stays authoritative for mechanics.
+ image:"./assets/cards/"+card.id+".png",
+ alt:card.name+" — ilustración de Serie I"
+}));
 export const CARDS_BY_ID=Object.fromEntries(CARDS.map(card=>[card.id,card]));
 export const BLOCK={id:"block",name:"Bloque de tierra",type:"unit",cost:0,attack:0,health:3,kind:"construcción",icon:"🟫",hue:31,effect:"none",text:"Un bloque que ocupa espacio. Steve se cree arquitecto.",series:"I",canvaPage:16};
