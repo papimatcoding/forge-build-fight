@@ -1,4 +1,4 @@
-import {CARDS,CARDS_BY_ID,BLOCK,RULES,CANVA_SERIES_I_URL} from './cards.js';
+import {CARDS,CARDS_BY_ID,COMBAT_CARDS,EFFECT_CARDS,BLOCK,RULES,CANVA_SERIES_I_URL} from './cards.js';
 import {RoomPeer,normalizeRoomCode,createRoomCode,isRemoteCommand} from './room.js';
 const $=id=>document.getElementById(id);
 const random=a=>a[Math.floor(Math.random()*a.length)];
@@ -6,24 +6,31 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let session=0,game=null,selected=null,logs=[],modalOpen=true,thinking=false;
 // UIDs already revealed on-screen. Newly visible cards animate exactly once.
 let revealedCards=[new Set(),new Set()];
+let inspected=null,lastFxSeen=0,fxClearTimer=null;
 let peer=null,remotePending=false,lastSnapshot=0,version=0;
 let awaitingSeq=0,commandTimer=null,helloTimer=null;
 const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
-const draw=()=>({uid:uid(),id:random(CARDS).id});
+const drawFrom=pool=>({uid:uid(),id:random(pool).id});
+const draw=()=>drawFrom(CARDS);
+const openingHand=()=>[drawFrom(COMBAT_CARDS),drawFrom(COMBAT_CARDS),drawFrom(EFFECT_CARDS)].sort(()=>Math.random()-.5);
 const playerName=i=>'JUGADOR '+(i+1);
 const card=id=>CARDS_BY_ID[id]||BLOCK;
 const own=()=>game.players[game.current];
 const other=()=>game.players[1-game.current];
 const lc=(text)=>{logs.unshift(text);logs=logs.slice(0,9);};
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('visible'),2400);}
-function newGame(mode){
+function newGame(mode,forcedFirst=null){
  if(peer&&mode!=='p2p-host'){peer.close();peer=null;}
  session++;selected=null;thinking=false;logs=[];modalOpen=false;remotePending=false;lastSnapshot=0;version=0;
  awaitingSeq=0;clearTimeout(commandTimer);commandTimer=null;clearTimeout(helloTimer);helloTimer=null;
- revealedCards=[new Set(),new Set()];
- game={mode,current:0,turns:0,score:0,finished:false,players:[0,1].map(()=>({energy:0,hand:Array.from({length:RULES.startingHand},draw),board:Array(RULES.lanes).fill(null),freeTurn:false,focusTargetId:null}))};
- lc('Empieza el duelo. La dignidad queda fuera del tablero.');
+ revealedCards=[new Set(),new Set()];inspected=null;lastFxSeen=0;clearTimeout(fxClearTimer);
+ const first=[0,1].includes(forcedFirst)?forcedFirst:(Math.random()<.5?0:1);
+ game={mode,current:first,firstPlayer:first,turns:0,score:0,finished:false,pendingDraw:false,fxEvents:[],fxSerial:0,
+  players:[0,1].map(()=>({energy:0,hand:openingHand(),board:Array(RULES.lanes).fill(null),freeTurn:false,focusTargetId:null}))};
+ lc('🪙 La moneda decide: empieza '+playerName(first)+'.');
+ announceAbility('🪙 MONEDA AL AIRE','¡Empieza '+playerName(first)+'!','coin');
  enterTurn();closeModal();render();
+ if(game.mode==='cpu'&&game.current===1)queueCPU();
 }
 function enterTurn(){
  const p=own();
@@ -44,12 +51,49 @@ function enterTurn(){
    if(u.health<=0)damage(game.current,i,999,'crisis de identidad');
   }
  }
- // Each player starts with exactly 3 cards; the first turn does not grant a fourth.
- // Beginning with their second own turn, draw one independent random card.
- const draws=game.turns<RULES.openingTurnsWithoutAttack?0:RULES.drawPerTurn;
- let drawn=0;
- for(let i=0;i<draws;i++)if(p.hand.length<RULES.maxHand){p.hand.push(draw());drawn++;}
- lc(playerName(game.current)+' recibe energía'+(drawn?' y roba '+drawn+' carta'+(drawn===1?'':'s'):' (mano inicial: 3 cartas)')+'.');
+ // Players choose combat or effect deck at each turn after both opening turns.
+ game.pendingDraw=game.turns>=RULES.openingTurnsWithoutAttack&&p.hand.length<RULES.maxHand;
+ lc(playerName(game.current)+' obtiene energía'+(game.pendingDraw?' y elige un mazo de robo.':'.'));
+}
+function announceAbility(title,detail,kind="ability"){
+ if(!game)return;
+ game.fxSerial=(game.fxSerial||0)+1;
+ game.fxEvents.push({id:game.fxSerial,title,detail,kind});
+ game.fxEvents=game.fxEvents.slice(-12);
+ lc(title+': '+detail);
+}
+function chooseDraw(player,deck){
+ if(!game||game.finished||game.current!==player||!game.pendingDraw||!["unit","spell"].includes(deck))return false;
+ const p=game.players[player];if(p.hand.length>=RULES.maxHand)return false;
+ p.hand.push(drawFrom(deck==="unit"?COMBAT_CARDS:EFFECT_CARDS));
+ game.pendingDraw=false;
+ announceAbility(deck==="unit"?"⚔ MAZO DE COMBATE":"✨ MAZO DE EFECTOS",
+  playerName(player)+" roba "+(deck==="unit"?"una criatura.":"una carta de efecto."),"draw");
+ render();
+ if(game.mode==="p2p-host")sendGuestSnapshot();
+ return true;
+}
+function bonusDraw(player,deck,count=1){
+ const p=game.players[player],pool=deck==="unit"?COMBAT_CARDS:EFFECT_CARDS;
+ let n=0;while(n<count&&p.hand.length<RULES.maxHand){p.hand.push(drawFrom(pool));n++;}
+ return n;
+}
+function renderAbilityFx(){
+ if(!game)return;
+ const fx=game.fxEvents?.at(-1),box=$("ability-fx");
+ if(!box||!fx||fx.id===lastFxSeen)return;
+ lastFxSeen=fx.id;
+ box.innerHTML='<div class="ability-fx-icon">'+(fx.kind==="coin"?"🪙":fx.kind==="draw"?"🃏":"✦")+"</div>"+
+ '<strong>'+escapeHtml(fx.title)+'</strong><span>'+escapeHtml(fx.detail)+'</span>';
+ box.classList.remove("show");void box.offsetWidth;box.classList.add("show");
+ clearTimeout(fxClearTimer);fxClearTimer=setTimeout(()=>box.classList.remove("show"),2200);
+}
+function renderInspector(){
+ const el=$("ability-inspector");if(!el)return;
+ if(!inspected){el.hidden=true;return;}
+ el.hidden=false;const info=card(inspected.id);
+ el.innerHTML='<button type="button" class="inspect-close" data-inspect-close aria-label="Cerrar">×</button>'+
+ '<strong>✦ '+escapeHtml(info.name)+'</strong><span>'+escapeHtml(info.text)+'</span>';
 }
 function modifiedCost(info,player){
  if(game.players[player].freeTurn)return 0;
@@ -126,7 +170,7 @@ function applyEffect(info,player,lane){
  }
 }
 function playCard(player,handUid,lane=null){
- if(!game||game.finished||game.current!==player)return false;
+ if(!game||game.finished||game.current!==player||game.pendingDraw)return false;
  const p=game.players[player],idx=p.hand.findIndex(h=>h.uid===handUid);
  if(idx<0)return false;
  const info=card(p.hand[idx].id),cost=modifiedCost(info,player);
