@@ -1,6 +1,6 @@
 // Serie I · Archivo de diseño fuente: Canva (URL y páginas enlazadas abajo).
-// No se incrustan URLs de miniaturas de Canva porque caducan; las cartas tienen arte local SVG/CSS.
-// CANVA_SERIES_I_URL se actualizará al terminar el álbum.
+// No se incrustan miniaturas de Canva porque sus URLs temporales caducan.
+// El código referencia el diseño permanente y cada carta guarda su número de página.
 export const CANVA_SERIES_I_URL = "https://www.canva.com/d/1nGX-UD4kuLDJGu";
 export const CANVA_SERIES_I_DESIGN_ID = "DAHaVoHzuyY";
 export const RULES = {
