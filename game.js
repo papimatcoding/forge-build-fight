@@ -349,7 +349,7 @@ function clearPending(){
 }
 function endTurn(fromRemote=false){
  const remote=fromRemote===true;
- if(!game||game.finished||thinking||(modalOpen&&!remote))return false;
+ if(!game||game.finished||thinking||game.pendingDraw||(modalOpen&&!remote))return false;
  if(game.mode==='p2p-guest'){
   if(remote||game.current!==1||remotePending||!peer?.connected||!peer.sendCommand({type:'end'}))return false;
   pendingRemote();return true;
@@ -482,7 +482,8 @@ function peerState(status){
 }
 function safeGuestSnapshot(){
  if(!game||game.mode!=='p2p-host')return null;
- return {mode:'p2p-guest',turns:game.turns,current:game.current,score:game.score,finished:game.finished,
+ return {mode:'p2p-guest',turns:game.turns,current:game.current,firstPlayer:game.firstPlayer,pendingDraw:game.pendingDraw,
+  fxEvents:game.fxEvents,fxSerial:game.fxSerial,score:game.score,finished:game.finished,
   players:game.players.map((p,i)=>({
    energy:p.energy,board:p.board,
    hand:i===1?p.hand.map(h=>({...h})):Array.from({length:p.hand.length},()=>({id:null,uid:null})),
@@ -505,7 +506,7 @@ function remoteMessage(message){
   const next=message.state;
   if(!Array.isArray(next.players)||next.players.length!==2||!Array.isArray(next.players[0].hand)||!Array.isArray(next.players[1].hand))return;
   if(next.players[0].hand.some(h=>h.id!==null||h.uid!==null))return;
-  if(![0,1].includes(next.current)||!Number.isInteger(next.turns)||next.turns<0||
+  if(![0,1].includes(next.current)||typeof next.pendingDraw!=='boolean'||!Number.isInteger(next.turns)||next.turns<0||
    next.players.some(p=>!Array.isArray(p.board)||p.board.length!==RULES.lanes))return;
   stopHello();lastSnapshot=message.version;game=next;logs=Array.isArray(next.log)?next.log.slice(0,9):[];
   selected=null;thinking=false;
@@ -532,7 +533,7 @@ function remoteMessage(message){
    sendGuestSnapshot();return;
   }
   const act=message.action;
-  const accepted=act.type==='play'?playCard(1,act.uid,act.lane):endTurn(true);
+  const accepted=act.type==='play'?playCard(1,act.uid,act.lane):act.type==='draw'?chooseDraw(1,act.deck):endTurn(true);
   if(!accepted){
    peer.send({type:'reject',seq:message.seq,reason:'carta o turno no válido'});
    sendGuestSnapshot();
@@ -560,6 +561,11 @@ function queueCPU(){
  setTimeout(()=>{
   if(thisSession!==session||!game||game.finished||game.current!==1)return;
   thinking=false;
+  if(game.pendingDraw){
+   const countUnits=own().hand.filter(h=>card(h.id).type==='unit').length;
+   const hasRoom=own().board.some(x=>x===null);
+   chooseDraw(1,countUnits<2&&hasRoom?'unit':'spell');
+  }
   // Simulated opponent: prioritizes available field positions and useful spells.
   for(let attempt=0;attempt<8;attempt++){
    const p=own(),usable=p.hand.map(h=>({h,info:card(h.id)})).filter(x=>modifiedCost(x.info,1)<=p.energy&&eligible(x.info,1));
@@ -659,9 +665,12 @@ function render(){
  }).join('');
  if(!me.hand.length&&!cpuThinking)$('hand').innerHTML='<div class="no-cards">No tienes cartas en la mano. Robarás al empezar tu siguiente turno.</div>';
  $('cancel').hidden=!selected;
- $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking||waiting||remotePending;
+ $('end-turn').disabled=modalOpen||thinking||game.finished||cpuThinking||waiting||remotePending||game.pendingDraw;
+ const choice=$('draw-choice');
+ if(choice)choice.hidden=!(game.pendingDraw&&myTurn&&!modalOpen&&!remotePending&&!cpuThinking);
+ renderInspector();renderAbilityFx();
  $('instruction').textContent=selected?card(selected.id).name+': '+card(selected.id).text:'Toca una carta para ver su efecto y jugarla.';
- $('hint').textContent=remotePending?'CONFIRMANDO JUGADA…':waiting?'ES EL TURNO DEL RIVAL':game.turns<2?'PREPARACIÓN: NO HAY ATAQUES':'AL ACABAR, SOLO ATACAN TUS CARTAS';
+ $('hint').textContent=remotePending?'CONFIRMANDO JUGADA…':waiting?'ES EL TURNO DEL RIVAL':game.pendingDraw?'ELIGE QUÉ MAZO ROBAR':game.turns<2?'PREPARACIÓN: NO HAY ATAQUES':'AL ACABAR, SOLO ATACAN TUS CARTAS';
  const focus=selected?card(selected.id):CARDS[0]; // Evita que la vista previa salte de carta cada vez que renderizamos.
  $('featured-name').textContent=focus.name;
  $('featured').innerHTML=cardHtml(focus,null,'feature-card');
@@ -670,7 +679,7 @@ function render(){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));}
 function chooseHand(uidValue){
- if(!game||modalOpen||thinking||game.finished||remotePending||game.mode==='cpu'&&game.current===1)return;
+ if(!game||modalOpen||thinking||game.finished||game.pendingDraw||remotePending||game.mode==='cpu'&&game.current===1)return;
  if(game.mode==='p2p-host'&&game.current!==0||game.mode==='p2p-guest'&&game.current!==1)return;
  if(selected?.uid===uidValue){selected=null;render();return;}
  const activePlayer=game.mode==='p2p-guest'?1:game.current;
@@ -689,7 +698,15 @@ function requestPlay(uidValue,lane=null){
  return playCard(game.current,uidValue,lane);
 }
 function chooseLane(side,lane){
- if(!selected||modalOpen||thinking||game.finished)return;
+ if(!selected){
+  if(!game||modalOpen)return;
+  const view=game.mode==='p2p-host'?0:game.mode==='p2p-guest'?1:game.current;
+  const owner=side==='own'?view:1-view;
+  const u=game.players[owner]?.board[lane];
+  if(u){inspected={id:u.id};renderInspector();}
+  return;
+ }
+ if(modalOpen||thinking||game.finished||game.pendingDraw)return;
  const info=card(selected.id);
  const target=info.type==='unit'?'friend':info.target;
  if(side==='own'&&(target==='friend'||target==='friendCancer')||side==='enemy'&&target==='enemy'){
@@ -699,6 +716,17 @@ function chooseLane(side,lane){
 document.addEventListener('click',event=>{
  const copy=event.target.closest('[data-room-copy]');if(copy){if(navigator.clipboard?.writeText)navigator.clipboard.writeText(copy.dataset.roomCopy).then(()=>toast('Código copiado')).catch(()=>toast('Anota el código mostrado.'));else toast('Anota el código mostrado.');return;}
  const link=event.target.closest('[data-room-link]');if(link){const url=location.origin+location.pathname+'?room='+encodeURIComponent(link.dataset.roomLink);if(navigator.clipboard?.writeText)navigator.clipboard.writeText(url).then(()=>toast('Enlace copiado')).catch(()=>toast('Copia el código manualmente.'));else toast('Copia el código manualmente.');return;}
+ const inspectClose=event.target.closest('[data-inspect-close]');
+ if(inspectClose){inspected=null;renderInspector();return;}
+ const drawButton=event.target.closest('[data-draw]');
+ if(drawButton){const deck=drawButton.dataset.draw;if(!['unit','spell'].includes(deck))return;
+  if(!game||modalOpen||!game.pendingDraw||remotePending)return;
+  if(game.mode==='p2p-guest'){
+   if(!peer?.sendCommand({type:'draw',deck})){toast('Conexión no disponible.');return;}
+   pendingRemote();
+  }else chooseDraw(game.current,deck);
+  return;
+ }
  const hand=event.target.closest('[data-hand]');if(hand){chooseHand(hand.dataset.hand);return;}
  const lane=event.target.closest('[data-lane]');if(lane){chooseLane(lane.dataset.side,Number(lane.dataset.lane));return;}
  const action=event.target.closest('[data-modal]');if(action){
