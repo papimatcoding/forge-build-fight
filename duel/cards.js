@@ -1,8 +1,8 @@
 // Serie I · Archivo de diseño fuente: Canva (URL y páginas enlazadas abajo).
 // No se incrustan URLs de miniaturas de Canva porque caducan; las cartas tienen arte local SVG/CSS.
 // CANVA_SERIES_I_URL se actualizará al terminar el álbum.
-export const CANVA_SERIES_I_URL = "https://www.canva.com/d/j5G0wgymYF6ft5I";
-export const CANVA_SERIES_I_DESIGN_ID = "DAHaVrIO6UM";
+export const CANVA_SERIES_I_URL = "https://www.canva.com/d/1nGX-UD4kuLDJGu";
+export const CANVA_SERIES_I_DESIGN_ID = "DAHaVoHzuyY";
 export const RULES = {
   lanes:4,
   startingHand:4,
