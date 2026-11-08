@@ -307,7 +307,7 @@ function joinPrompt(code=''){
   {label:'CONECTAR',action:'join-by-code',primary:true},
   {label:'VOLVER',action:'online'}
  ],'<label class="signal-label" for="join-room-code">CÓDIGO DE SALA</label>'+
-  '<input id="join-room-code" class="room-code-input" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" placeholder="ABC123" value="'+clean+'">');
+  '<input id="join-room-code" class="room-code-input" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" placeholder="ABC234" value="'+clean+'">');
 }
 function joinByCode(){
  const code=normalizeRoomCode($('join-room-code')?.value);
@@ -326,11 +326,11 @@ function peerState(status){
  if(status==='connected'){
   clearPending();
   if(peer.role==='guest'){
-   peer.send({type:'hello',protocol:1});
    showModal('CONEXIÓN <em>ESTABLECIDA</em>','ONLINE · JUGADOR 2',
     'Esperando a que se repartan las tres cartas iniciales…',[
     {label:'CANCELAR',action:'select-mode'}
    ]);
+   peer.send({type:'hello',protocol:1});
   }else{
    showModal('RIVAL <em>CONECTADO</em>','ONLINE · JUGADOR 1',
     'Preparando el tablero para los dos jugadores…',[
