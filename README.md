@@ -1,66 +1,67 @@
-# Barbaridades — Serie I (0.2)
+# BARBARIDADES — Serie I · 0.3
 
-**Un juego de cartas absurdas con decisiones estratégicas.** Este proyecto sustituye el prototipo Tower Defense anterior en el repositorio `forge-build-fight`.
+Juego web de estrategia por turnos con 16 cartas absurdas, cuatro carriles y victoria por balanza. Sustituye definitivamente el viejo prototipo **Forge Build Fight**.
 
-## Jugar
+**Jugar**: https://papimatcoding.github.io/forge-build-fight/
 
-Prueba el prototipo en GitHub Pages: https://papimatcoding.github.io/forge-build-fight/
+**Canva (versión investigada):** https://www.canva.com/d/fEFpe7VMr09hhNH  
+**Carpeta de trabajo:** https://www.canva.com/folder/FAHaVurOQPc
 
-Para jugar en local, abre `index.html` desde un servidor estático (`python -m http.server 8000`, por ejemplo). No necesitas instalar dependencias. El motor no requiere conexión a internet; el enlace de Canva y las fuentes web sí.
+## Reglas
 
-### Modos disponibles
+- Los jugadores comparten una arena con **4 carriles enfrentados**.
+- Al comienzo de cada turno propio: **+3 energía** y **+1 carta aleatoria** (también salen repetidas). La energía se acumula hasta 10. La mano inicial son 4 cartas, más el robo del primer turno.
+- Juegas cuantas cartas y efectos quieras pagando la energía.
+- Los **dos primeros turnos globales** no tienen fase de ataque.
+- Desde el tercer turno, al pulsar *Acabar turno*, **solo atacan las criaturas del jugador activo**, de carril a carril. Si no hay carta rival enfrente, anota directamente en la balanza.
+- Gana quien alcanza una ventaja de **5 puntos**.
+- Las criaturas defensoras no contraatacan al ser golpeadas salvo habilidades específicas, como las paletas de Pereira.
 
-- **1v1 local en un mismo dispositivo**: al terminar un turno aparece una pantalla para pasar el dispositivo. Cada jugador solo ve su mano al pulsar continuar.
-- **Vs CPU**: bot sencillo para comprobar las reglas. No es multijugador online ni IA avanzada.
+## Modos
 
-**IMPORTANTE:** GitHub Pages solo sirve archivos estáticos. Todavía no existe modo multijugador remoto ni matchmaking.
+### 1v1 P2P entre dos dispositivos — experimental
 
-## Reglas del primer prototipo
+WebRTC DataChannel con conexión directa y cifrada. El jugador que crea la sala (J1) es **anfitrión autoritativo**: ejecuta la lógica, los robos aleatorios y el estado verdadero. J2 solo recibe el estado público y su propia mano; nunca recibe los identificadores ni nombres de las cartas ocultas de J1. J1 técnicamente conserva el estado completo de la partida en su propio navegador; por tanto, **no es resistente a trampas del anfitrión**.
 
-- Cuatro carriles para cada jugador. Las criaturas atacan la carta rival enfrentada; si el carril está libre, inclinan la balanza.
-- Cada jugador recibe **3 de energía al comienzo de su propio turno**; puede guardar hasta un máximo de 10.
-- Se roba una carta completamente aleatoria por turno, con duplicados y un máximo de 9 cartas en la mano. La mano inicial es de 4 más el robo del turno inicial.
-- Cada jugador puede jugar tantas cartas como quiera mientras tenga energía, y acaba su turno cuando lo decida.
-- Los dos primeros turnos globales son preparación, **sin ataques**.
-- A partir del tercer turno global, **solo atacan las criaturas del jugador que acaba de terminar su propio turno**.
-- Gana quien consiga una diferencia de **5 puntos en la balanza**.
-- Las criaturas no contraatacan al recibir ataques, salvo habilidades explícitas.
+Pasos:
+1. Los dos jugadores abren la página en sus dispositivos, eligen **1v1 · Dos dispositivos (P2P)**.
+2. J1 pulsa **Crear sala**, copia la **oferta** que aparece y la envía al amigo por mensajería.
+3. J2 pulsa **Unirse**, pega la oferta, pulsa **Generar respuesta**, copia la **respuesta** y la devuelve a J1.
+4. J1 pega la respuesta y pulsa **Aplicar respuesta**. Si el canal WebRTC conecta, empieza la partida. Las acciones de J2 viajan como comandos con números de secuencia; J1 los valida y devuelve estados con la mano rival ocultada.
 
-## Catálogo: Serie I (16 cartas)
+**Limitaciones importantes:** sin servidor de señalización ni TURN, la conexión depende del STUN público y de las redes NAT. En algunas conexiones móviles, VPN o redes corporativas no funcionará. No hay reconexión automática ni salas por código corto. Los pares pueden conocer sus IP por WebRTC; comparte las ofertas solo con amigos de confianza. No se ha verificado aún el funcionamiento entre dos dispositivos físicos.
 
-`cards.js` define los 16 naipes, con coste, estadísticas, efectos y referencias de página a Canva. El motor y UI están en `game.js`, `index.html` y `styles.css`.
+### 1v1 local
 
-### Cambios especiales confirmados
+Dos personas se turnan con el mismo dispositivo. Hay una pantalla de paso para ocultar temporalmente la mano del siguiente jugador.
 
-- **Beca MEC**: +1 energía al comenzar cada turno propio mientras esté en el campo.
-- **Pereira Castor**: al morir, contraataca con sus paletas.
-- **Hipergamia**: selecciona una criatura enemiga para concentrar contra ella el siguiente ataque de todas las criaturas aliadas (el efecto se consume en ese ataque, incluso si se jugó durante preparación).
-- **Token pirata de Fortnite**: las cartas restantes cuestan cero durante ese turno, incluso con Inspector Hacienda.
-- **Perry el ornitorrinco**: con gorro 2/3 y escudo para un efecto hostil; sin gorro 4/2; alterna al empezar cada turno **de su dueño**.
-- **La vaca que ríe**: tras atacar entrega quesos a criaturas aliadas adyacentes y les recupera un punto de vida.
+### Contra CPU
 
-## Arte en Canva
+Rival básico no competitivo, útil para probar cartas.
 
-**Álbum editable de la Serie I:** https://www.canva.com/d/1nGX-UD4kuLDJGu
+## Cartas y arte
 
-**Carpeta de Canva:** https://www.canva.com/folder/FAHaVurOQPc
+`cards.js` es la fuente de verdad de nombres, costes, estadísticas, efectos y vínculos con Canva. La Serie I contiene 16 cartas. **Raúl Becas y Ayudas** es el nombre de la carta; **Beca MEC** es su habilidad de +1 energía al comienzo de tus turnos. Otras mecánicas: Pereira contraataca con sus paletas, Hipergamia concentra el ataque, Token pirata deja el resto del turno sin coste, Perry alterna formas con gorro/sin gorro, La vaca que ríe regala quesos curativos.
 
-Las cartas siguen el mismo orden que `CARDS` y `canvaPage` marca su página 1–16. La interfaz usa **iconos provisionales y tarjetas hechas con CSS**; no se incluyen miniaturas temporales con enlaces firmados porque caducan. Antes de la versión final habrá que exportar las ilustraciones a archivos permanentes y sustituir esos placeholders.
+Las ilustraciones de Canva se integran en `assets/cards/` como **PNG locales permanentes**, no como URLs temporales. Para que el texto dinámico del juego nunca contradiga las reglas, se recortó el *arte central* de los diseños (algunas leyendas generadas por Canva no coincidían exactamente con el balance). Cada carta dispone de `id.png` (ilustración 512×512), `id-256.png` y `id-full.png` (página Canva 512×704 a modo de referencia). El recorte se realizó a partir de previsualizaciones de Canva de 381×524, por lo que el archivo ampliado no equivale a exportación de alta resolución nativa.
 
-## Tests
+**Arte y derechos:** se incluyen reinterpretaciones de memes, personajes y marcas ajenas. Antes de publicar comercialmente se deben revisar derechos de imagen, de marcas y de personajes (Disney, Minecraft, El Hormiguero, Fortnite, La vaca que ríe, creador Raúl). No es un producto oficial ni está afiliado a dichas entidades.
+
+## Desarrollo
 
 ```bash
-npm test
 npm run check
+npm test
+python3 -m http.server 8000
 ```
 
-El test suite comprueba reglas de turno, catálogo, Hipergamia, Token pirata, Beca MEC, Perry, Pereira, quesos y Cáncer/Quimio. Los tests no sustituyen las pruebas visuales y multijugador.
+Abrir después http://localhost:8000. Carga módulos ES; no sirve abrir `index.html` directamente como archivo local.
 
-## Roadmap
+El contenido original se aloja en GitHub Pages con un workflow de Actions (`.github/workflows/pages.yml`). `scripts/import_canva_previews.py` es un importador de una sola ejecución; las URLs firmadas en `scripts/canva_preview_sources.json` caducan y no están pensadas como dependencia de producción. El juego ejecuta exclusivamente los PNG permanentes alojados junto al código.
 
-1. Probar partidas completas, revisar balance y corregir bugs.
-2. Exportar artes individuales permanentes desde Canva y conectarlos a las cartas.
-3. Ampliar la colección y crear audio, animaciones y sinergias absurdas.
-4. Implementar multijugador online con servidor autoritativo y salas privadas.
+## Próximas mejoras
 
-**Advertencia de propiedad intelectual:** hay nombres y referencias a personajes de terceros. Antes de distribuir comercialmente el juego convendría revisar licencias y sustituir diseños protegidos si procede.
+- Playtests de balance y funcionamiento P2P en dos dispositivos y distintas redes.
+- Exportación desde Canva del arte nativo a resolución alta y revisión visual individual.
+- Reconexión, servidor TURN opcional y salas con código corto.
+- Desacoplar el motor de la UI, semilla auditada/compromiso de RNG para evitar la confianza ciega en el anfitrión.
