@@ -34,6 +34,7 @@ export const CARDS=[
  ...card,series:"I",canvaPage:index+1,
  // Illustrations imported from the Canva portrait edition; HTML stays authoritative for mechanics.
  image:"./assets/cards/"+card.id+".png",
+ fullImage:"./assets/cards/"+card.id+"-full.png",
  alt:card.name+" — ilustración de Serie I"
 }));
 export const CARDS_BY_ID=Object.fromEntries(CARDS.map(card=>[card.id,card]));
