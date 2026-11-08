@@ -25,11 +25,13 @@ jobs:
           python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/barbaridades-http.log 2>&1 &
           sleep 2
       - name: Test gameplay in five viewport sizes
-        run: node tests/layout.browser.mjs
+        run: |
+          node tests/layout.browser.mjs
+          node tests/play-field.browser.mjs
       - name: Upload screenshots if a viewport fails
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: barbaridades-ui-failures
+          name: barbaridades-ui-artifact-proof
           path: /tmp/barbaridades-*.png
           if-no-files-found: ignore
