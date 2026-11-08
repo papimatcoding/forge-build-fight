@@ -570,8 +570,8 @@ function chooseLane(side,lane){
  }else toast('Selecciona un objetivo del campo correcto.');
 }
 document.addEventListener('click',event=>{
- const copy=event.target.closest('[data-room-copy]');if(copy){navigator.clipboard?.writeText(copy.dataset.roomCopy).then(()=>toast('Código copiado')).catch(()=>toast('Anota el código mostrado.'));return;}
- const link=event.target.closest('[data-room-link]');if(link){const url=location.origin+location.pathname+'?room='+encodeURIComponent(link.dataset.roomLink);navigator.clipboard?.writeText(url).then(()=>toast('Enlace copiado')).catch(()=>toast('Copia el código manualmente.'));return;}
+ const copy=event.target.closest('[data-room-copy]');if(copy){if(navigator.clipboard?.writeText)navigator.clipboard.writeText(copy.dataset.roomCopy).then(()=>toast('Código copiado')).catch(()=>toast('Anota el código mostrado.'));else toast('Anota el código mostrado.');return;}
+ const link=event.target.closest('[data-room-link]');if(link){const url=location.origin+location.pathname+'?room='+encodeURIComponent(link.dataset.roomLink);if(navigator.clipboard?.writeText)navigator.clipboard.writeText(url).then(()=>toast('Enlace copiado')).catch(()=>toast('Copia el código manualmente.'));else toast('Copia el código manualmente.');return;}
  const hand=event.target.closest('[data-hand]');if(hand){chooseHand(hand.dataset.hand);return;}
  const lane=event.target.closest('[data-lane]');if(lane){chooseLane(lane.dataset.side,Number(lane.dataset.lane));return;}
  const action=event.target.closest('[data-modal]');if(action){
