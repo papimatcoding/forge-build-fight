@@ -459,7 +459,8 @@ function render(){
   const info=card(h.id);
   const isNew=justDealt.has(h.uid);
   const progress=handCount>1?i/(handCount-1):.5;
-  const styles='--pos:'+progress.toFixed(5)+';--stack:'+(i+1)+';--deal-delay:'+(isNew?Math.min(i*115,800):0)+'ms';
+  const offset=(progress*100).toFixed(2);
+  const styles='--pos:'+offset+'%;--shift:-'+offset+'%;--stack:'+(i+1)+';--deal-delay:'+(isNew?Math.min(i*115,800):0)+'ms';
   return '<button class="hand-card '+(selected?.uid===h.uid?'selected ':'')+(isNew?'is-dealt':'')+
    '" style="'+styles+'" data-hand="'+h.uid+'" title="'+escapeHtml(info.name+': '+info.text)+
    '" aria-label="'+escapeHtml(info.name+'; '+info.text)+'">'+cardHtml(info,null,'hand')+'</button>';
