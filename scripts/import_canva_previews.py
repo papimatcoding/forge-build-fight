@@ -30,9 +30,15 @@ for page in pages:
         raise RuntimeError("Cannot fetch Canva image "+page["id"]+": "+str(exc)) from exc
     original=Image.open(BytesIO(data)).convert("RGB")
     assert original.width>=250 and original.height>=350,(page["id"],original.size)
-    # Portrait layout matches 8:11 card size. Use LANCZOS for display thumbnails.
-    image=ImageOps.fit(original,(512,704),method=Image.Resampling.LANCZOS,centering=(0.5,0.5))
-    image.save(out/(page["id"]+".png"),format="PNG",optimize=True)
-    image.resize((256,352),Image.Resampling.LANCZOS).save(out/(page["id"]+"-256.png"),format="PNG",optimize=True)
-    print(f'{page["index"]:02d}/16 {page["id"]} source={original.size} png={image.size}')
-assert len(list(out.glob("*.png")))==32, "Missing PNG assets"
+    # Full Canva page has a centered trading card and large surrounding margins.
+    # The illustration sits inside that trading card; extract it to avoid duplicating
+    # Canva-generated (occasionally inaccurate) cost/effect text over HTML values.
+    full=ImageOps.fit(original,(512,704),method=Image.Resampling.LANCZOS)
+    full.save(out/(page["id"]+"-full.png"),format="PNG",optimize=True)
+    # Ratios were visually verified on the 16-page portrait card template.
+    art=full.crop((int(512*.254),int(704*.289),int(512*.728),int(704*.615)))
+    art=ImageOps.fit(art,(512,512),method=Image.Resampling.LANCZOS)
+    art.save(out/(page["id"]+".png"),format="PNG",optimize=True)
+    art.resize((256,256),Image.Resampling.LANCZOS).save(out/(page["id"]+"-256.png"),format="PNG",optimize=True)
+    print(f'{page["index"]:02d}/16 {page["id"]} source={original.size} artwork={art.size}')
+assert len(list(out.glob("*.png")))==48, "Missing PNG assets"
