@@ -398,9 +398,9 @@ function cardHtml(c,unit=null,variant='hand'){
  const badges=unit?(unit.cancer?'<span class="status cancer">🦠 '+unit.cancer+'</span>':'')+(unit.stun?'<span class="status">💫</span>':'')+(unit.shield?'<span class="status">🕵️</span>':'')+(unit.cheese?'<span class="status">🧀'+unit.cheese+'</span>':''):'';
  const artIcon=unit&&c.id==='perry'?(unit.hat?'🕵️':'🦦'):c.icon;
  return '<div class="card-piece '+c.type+' '+variant+(variant==='hand'&&!active?' inactive':'')+'" style="--art-hue:'+c.hue+'">'
-   +'<div class="card-top"><span class="cost-bubble">⚡'+(variant==='hand'&&game?modifiedCost(c,game.current):c.cost)+'</span><span class="set-tag">SERIE I</span></div>'
+   +'<div class="card-top"><span class="card-heading">'+escapeHtml(c.name)+'</span><span class="cost-bubble">⚡'+(variant==='hand'&&game?modifiedCost(c,view):c.cost)+'</span></div>'
    +'<div class="card-art"><span class="art-spot"></span><span class="card-icon">'+artIcon+'</span><span class="art-rays">✷</span>'+(c.image?'<img class="card-art-image" src="'+c.image+'" alt="'+escapeHtml(c.alt)+'" loading="lazy" onerror="this.remove()">':'')+'</div>'
-   +'<div class="card-name">'+c.name+'</div><div class="card-kind">'+c.kind+'</div>'
+   +'<div class="card-kind">'+c.kind.toUpperCase()+' · SERIE I</div>'
    +(variant==='board'?'':('<p class="card-description">'+c.text+'</p>'))
    +'<div class="card-bottom">'+stats+badges+'</div></div>';
 }
