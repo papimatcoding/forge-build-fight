@@ -1,9 +1,9 @@
 {
   "name": "barbaridades-card-duel",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Barbaridades: ridiculous turn-based online P2P card duel, Serie I",
+  "description": "Barbaridades 0.4: fullscreen responsive card arena with animated three-card deal and P2P",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "check": "node --check game.js && node --check cards.js && node --check remote.js"
