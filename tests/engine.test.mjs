@@ -23,7 +23,8 @@ test("16 cards with valid costs and Canva references",()=>{
  assert.equal(new Set(CARDS.map(c=>c.id)).size,16);
  assert.deepEqual(CARDS.map(c=>c.canvaPage),Array.from({length:16},(_,i)=>i+1));
  assert.match(CANVA_SERIES_I_URL,/canva\.com/);
- assert.equal(CARDS_BY_ID.raul.name,"Beca MEC");
+ assert.equal(CARDS_BY_ID.raul.name,"Raúl Becas y Ayudas");
+ assert.equal(CARDS_BY_ID.raul.abilityName,"Beca MEC");
  for(const c of CARDS){assert.ok(c.cost>=0);if(c.type==="unit"){assert.ok(c.health>0);assert.ok(c.attack>=0);}}
 });
 
